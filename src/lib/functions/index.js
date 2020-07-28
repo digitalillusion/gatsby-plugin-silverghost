@@ -1,19 +1,9 @@
-import JSOG from "jsog";
-import React from "react";
+import serializeJavascript from "serialize-javascript";
+import { DEFAULT_SERIALIZE_OPTIONS } from "../constants";
 
 export const flatMap = (xs, f) =>
   (xs || []).reduce((acc, x) => acc.concat(f(x)), []);
 
-/**
- * Remove __jsogObjectId since they are local to decoded objects and they mix up when merging or comparing for equality two different decoded objects
- */
-const JSOGclear = o => {
-  return traverse(o, (obj, key) =>
-    key === "__jsogObjectId" || key === "@id" || key === "@ref"
-      ? delete obj[key]
-      : undefined
-  );
-};
 
 /**
  * @param o
@@ -52,8 +42,8 @@ export const equalGraphs = (o1, o2, excluder) => {
   if (o1 === o2) {
     return true;
   }
-  let serialized1 = JSOGclear(JSOG.encode(o1));
-  let serialized2 = JSOGclear(JSOG.encode(o2));
+  let serialized1 = serializeJavascript(o1, DEFAULT_SERIALIZE_OPTIONS);
+  let serialized2 = serializeJavascript(o2, DEFAULT_SERIALIZE_OPTIONS);
   if (excluder) {
     traverse(serialized1, (obj, key) => {
       if (excluder(obj, key)) {
@@ -68,8 +58,6 @@ export const equalGraphs = (o1, o2, excluder) => {
   }
   let graphEquality =
     JSON.stringify(serialized1) === JSON.stringify(serialized2);
-  JSOGclear(o1);
-  JSOGclear(o2);
   return graphEquality;
 };
 
@@ -111,8 +99,8 @@ export const traverse = (obj, fn, visited = []) => {
  * @return {string} The URI encoded version of the input parameter
  */
 export const encodeURIComponentObject = function(obj) {
-  var str = [];
-  for (var p in obj) {
+  let str = [];
+  for (let p in obj) {
     if (obj.hasOwnProperty(p)) {
       if (Array.isArray(p)) {
         if (p.length > 0) {

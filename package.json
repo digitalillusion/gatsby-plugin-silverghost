@@ -25,7 +25,7 @@
   "author": "Adriano Dalpane <adriano.dalpane@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "jsog": "^1.0.7"
+    "serialize-javascript": "^4.0.0"
   },
   "peerDependencies": {
     "react": "*",

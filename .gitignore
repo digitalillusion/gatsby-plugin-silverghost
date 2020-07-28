@@ -2,5 +2,5 @@
 **/.cache
 node_modules
 lib
-index.js
+gatsby-*.js
 .idea

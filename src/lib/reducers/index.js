@@ -2,12 +2,14 @@ import { isEmpty, isObject } from "../functions";
 import listReducer from "./ListReducer";
 
 export class DefaultReducer {
+
   /**
+   * @param initialState
    * @param actionDefinitions
    * @returns {Function} For the given action definitions, return the matching runtime action as-is or return the state otherwise
    */
-  static instance(...actionDefinitions) {
-    return (state = {}, action) => {
+  static instance(initialState, ...actionDefinitions) {
+    return (state = initialState, action) => {
       let index = actionDefinitions
         .map(definition => definition.DATA)
         .indexOf(action.type);
@@ -44,7 +46,7 @@ export const ListReducer = listReducer;
  * @return {Function} The first reduction performed or the state if none is performed
  */
 export const chain = (...reducers) => {
-  return (state = {}, action) => {
+  return (state, action) => {
     for (let reducer of reducers) {
       let reduction = reducer(state, action);
       if (reduction === undefined) {
@@ -63,7 +65,7 @@ export const chain = (...reducers) => {
  * @return {Function} A reduction that combines eventual reduction performed by the activated reducers with the state returned by the reducers that were not activated, keeping the same order of the original multiple payload
  */
 export const split = (actionDefinitions, ...reducers) => {
-  return (state = {}, action) => {
+  return (state, action) => {
     let matchAction = actionDefinitions.find(
       definition =>
         definition.DATA === action.type || definition.REQUEST === action.type
@@ -168,7 +170,7 @@ export const accumulate = reducer => {
     return parent[parentParam];
   }
 
-  return (state = {}, action) => {
+  return (state, action) => {
     let reduction = reducer(state, action);
     if (reduction === state) {
       return state;
@@ -219,7 +221,7 @@ export const accumulate = reducer => {
  * @return {Function} A reduction that combines the previous state with the new reduction if activated or the state if the new reduction was not activated
  */
 export const collect = reducer => {
-  return (state = {}, action) => {
+  return (state, action) => {
     let reduction = reducer(state, action);
     if (reduction === state) {
       return state;

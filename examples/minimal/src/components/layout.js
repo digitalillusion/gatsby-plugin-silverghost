@@ -11,7 +11,7 @@ import { useStaticQuery, graphql } from "gatsby"
 
 import Header from "./header"
 import "./layout.css"
-import { NavigationBuilder } from "gatsby-plugin-silverghost"
+import { NavigationBuilder } from "gatsby-plugin-silverghost/lib/components/NavigationBuilder"
 
 let navigationBuilder = new NavigationBuilder()
 

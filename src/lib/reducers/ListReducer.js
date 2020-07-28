@@ -1,7 +1,12 @@
 import { equalGraphs, flatMap } from "../functions";
 
 export default class ListReducer {
-  static instance(...actionDefinitions) {
+  /**
+   * @param initialState
+   * @param actionDefinitions
+   * @returns {Function} For the given action definitions, return the list reduction or return the initialstate otherwise
+   */
+  static instance(initialState, ...actionDefinitions) {
     const reduction = (state, action) => {
       let reducedState = Object.assign({}, state);
 
@@ -92,7 +97,7 @@ export default class ListReducer {
       return reduced;
     };
 
-    return (state = {}, action) => {
+    return (state = initialState, action) => {
       let index = actionDefinitions
         .map(definition => definition.DATA)
         .indexOf(action.type);
