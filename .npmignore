@@ -1,0 +1,10 @@
+.DS_Store
+.cache
+.idea
+node_modules
+dist
+src
+examples
+.vscode/
+.eslintrc.js.js
+.gitignore

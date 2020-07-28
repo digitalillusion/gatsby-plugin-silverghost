@@ -1,0 +1,6 @@
+**/*.orig
+**/.cache
+node_modules
+lib
+index.js
+.idea
