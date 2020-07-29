@@ -523,8 +523,17 @@ export class NavigationBuilder {
             };
             let res = performMapping(href.options.mapper, mappingContext);
 
-            if (mappingContext.ajax && target.preventDefault) {
-              target.preventDefault();
+            if (mappingContext.ajax) {
+              // Try to find the HTML target to preventDefault()
+              if (target.preventDefault) {
+                target.preventDefault();
+              } else {
+                Object.keys(target).forEach(prop => {
+                  if (target[prop].preventDefault) {
+                    target[prop].preventDefault();
+                  }
+                });
+              }
             }
 
             if (res !== false) {

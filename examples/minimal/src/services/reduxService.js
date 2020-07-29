@@ -1,12 +1,12 @@
 import { Actions } from "../actions/createActions"
 
-function handleWelcome(store, action, params, next) {
+function handleWelcome(state, action, params, next) {
   let request = params[0]
 
   let payload = {}
   switch (request.event) {
     case "change":
-      const current = store.getState()[Actions.WELCOME.getReducerKey()].payload
+      const current = state.payload
       payload.timestamp = current[request.channel].timestamp
       payload.message = current[request.channel].message || ""
       payload.channel = request.channel
@@ -30,7 +30,8 @@ export const reduxService = store => next => action => {
 
   switch (matched.type) {
     case Actions.WELCOME.REQUEST:
-      handleWelcome(store, matched, params, next)
+      const state = store.getState()[Actions.WELCOME.getReducerKey()]
+      handleWelcome(state, matched, params, next)
       break
     default:
   }
