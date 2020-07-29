@@ -10,7 +10,14 @@ Configuration
  - *./src/actions/createActions* contains the actions definitions
  - *./src/actions/createStore* creates the redux store as needed
 
+There are other files which are necessary to the example but not directly referenced by the framework, being:
+
+ - *./src/services/reduxService* contains the reduction logic
+ - *./src/pages/index.js* the view
+
+
 **Actions**
+
 The createActions file contains the following definition:
 
     import {  
@@ -62,6 +69,7 @@ Intuitively, the structure which is formed by the definition above reflect the f
 NOTE: Ordering of the actions matters! Only the first path matching all path parameters and fixed url parts will be retained.
 
 **Store**
+
 In this example, we just use a root reducer and a single middleware that receives the actions and updates the redux state, but there can be many different reducers and middlewares
 The createStore file contains the following definition:
 
@@ -74,6 +82,7 @@ The createStore file contains the following definition:
 It exports an arrow function called by the plugin. The preloaded state is the initial state passed by the plugin after ssr has occurred. Next, let's give a look at the rootReducer
     
 **Root reducer**
+
 A way to define a root reducer is to use [combineReducers](https://redux.js.org/api/combinereducers) function, specifying a key-value pair: for each action that needs to be reduced, the reducer that should take care of it.
 
     const initialState = Actions.WELCOME.instance({
@@ -118,7 +127,7 @@ What this code is doing will be clearer once we give a look at the middleware:
       // Pass the action to following middlewares  
       return action  
     }
-The reduction service is dispatching every action to a different function, so that it can be easily handled. Next, we give a look ath the `handleWelcome` function in detail:
+The reduction service is dispatching every action to a different function, so that it can be easily handled. Next, we give a look at the `handleWelcome` function in detail:
 
     function handleWelcome(state, action, params, next) {  
       let request = params[0]  
@@ -147,12 +156,12 @@ The service has access tho the previous state and can do business logic on it. H
 The call to next() propagates the input action, modified by the resulting payload, toward the next stages of the middleware and lastly toward the view.
 
 **View**
-That was a lot going on before we reach the view, but hopefully it will make sense as soon as we look how things go alltoghether.
+That was a lot of preparation before we reach the view, but hopefully it will make sense as soon as we look how things go altogether.
 The HomePage component in ./src/pages/index.js can retrieve the redux state from the store and gain access to both last action's parameters and payload:
 
     const welcome = useSelector(state => state.welcome, [])  
     const channel = welcome.params[0]
-It's easy now what part of the view is going to get updated. There is the possibility of writing conditional expressions:
+It's easy now to know what part of the view is going to get updated. There is the possibility of writing conditional expressions:
 
     const isRoomChannel = channel === "room"
     <input type="radio" name="channel" value="room" {...(isRoomChannel ? { defaultChecked: true} : {})}  

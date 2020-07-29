@@ -5,7 +5,7 @@ import {useSelector, useStore} from "react-redux";
 import {Actions} from "../actions/createActions";
 import {graphql, useStaticQuery} from "gatsby";
 
-const HomePage = () =>  {
+const WelcomeMessage = () =>  {
     const data = useStaticQuery(graphql`
     query SiteTitleQuery {
       site {
@@ -87,4 +87,4 @@ const HomePage = () =>  {
     )
 }
 
-export default HomePage
+export default WelcomeMessage
