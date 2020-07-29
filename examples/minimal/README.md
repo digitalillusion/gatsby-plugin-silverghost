@@ -5,12 +5,12 @@ Demonstrating how reductions accumulate into redux state according to action par
   
 Configuration  
 --  
- In order to take advantage of the framework, based on redux the following configuration is needed. The files location is arbitrary as long as they are correctly referenced in `gatsby-config.js`
+ In order to take advantage of the framework, the following configuration is needed. The files' location is arbitrary as long as they are correctly referenced in `gatsby-config.js`.
  
  - *./src/actions/createActions* contains the actions definitions
  - *./src/actions/createStore* creates the redux store as needed
 
-There are other files which are necessary to the example but not directly referenced by the framework, being:
+There are other files which are necessary to the example but not directly referenced by the framework:
 
  - *./src/services/reduxService* contains the reduction logic
  - *./src/pages/index.js* the view
@@ -70,7 +70,7 @@ NOTE: Ordering of the actions matters! Only the first path matching all path par
 
 **Store**
 
-In this example, we just use a root reducer and a single middleware that receives the actions and updates the redux state, but there can be many different reducers and middlewares
+In this example, we just use a root reducer and a single middleware that receives the actions and updates the redux state, but there can be many middlewares.
 The createStore file contains the following definition:
 
     import { applyMiddleware, createStore } from "redux"  
@@ -152,22 +152,24 @@ The reduction service is dispatching every action to a different function, so th
       )  
     }
 
-The service has access tho the previous state and can do business logic on it. However, the produced payload is completely agnostic about the current reduction state, and **the service focus only on producing the effect of this specific invocation**, without the need to deal with merges of the new and the old state.
+The service has access to the previous state and can do business logic on it. However, the produced payload is completely agnostic about the current reduction state, and **the service focus only on producing the effect of this specific invocation**, without the need to deal with merges of the new and the old state.
 The call to next() propagates the input action, modified by the resulting payload, toward the next stages of the middleware and lastly toward the view.
 
 **View**
-That was a lot of preparation before we reach the view, but hopefully it will make sense as soon as we look how things go altogether.
-The HomePage component in ./src/pages/index.js can retrieve the redux state from the store and gain access to both last action's parameters and payload:
+
+That was a lot of preparation before we reach the view, but hopefully it will all make sense as soon as we look how things go altogether.
+The WelcomeMessage component in ./src/pages/index.js can retrieve the redux state from the store and gain access to both last action's parameters and payload:
 
     const welcome = useSelector(state => state.welcome, [])  
     const channel = welcome.params[0]
+    
 It's easy now to know what part of the view is going to get updated. There is the possibility of writing conditional expressions:
 
     const isRoomChannel = channel === "room"
     <input type="radio" name="channel" value="room" {...(isRoomChannel ? { defaultChecked: true} : {})}  
        onChange={target => navigation.onEvent(Actions.WELCOME)({ event: "change", target})} />
 
-And also to output all or part of the payload accordingly:
+To output all or part of the payload accordingly:
 
     <h3>Room Message</h3>  
     <table>  
@@ -178,7 +180,43 @@ And also to output all or part of the payload accordingly:
         </tr>}  
       </tbody>  
     </table>
+    
+As briefly seen above, the `navigation.onEvent(Actions.WELCOME)` is responsible for triggering an event. Its curry 
+holds all the necessary data, for instance `({ event: "change", target})` where `target` contains information about html 
+event that happened (a radio button click here above).
 
+The code builds the navigation as follows:
+
+     const navigation = new NavigationBuilder(store)
+        .withEvent(Actions.WELCOME, { mapper: (action, input) => {
+            const event = input.target.event;
+            const target = input.target.target;
+            switch (event) {
+                case "change" :
+                    return Object.assign(action, { params : [{
+                        event,
+                        channel: target.currentTarget.value
+                    }] })
+                case "submit" :
+                default:
+                    const formData = new FormData(target.currentTarget)
+                    return Object.assign(action, { params: [{
+                        event,
+                        timestamp: new Date().toString(),
+                        channel: formData.get("channel"),
+                        message: formData.get("message")
+                    }] })
+            }
+        }, ajax: true})
+        .build()
+        
+The above code maps an event toward an action that depends on the input context, which assembles a mapping context and the curry from the invocation.
+It is executed when the user triggers an event correspondent to our *welcome* action, right before the execution goes to
+the reduction services for matching and processing. 
+> The mapper must return the action passed in so that the matching occurs; furthermore it can add several `params` to the request,
+as needed by the processing phase  
+
+ 
 Run the example application  
 --  
   
@@ -187,5 +225,6 @@ Run the example application
     
 License  
 --  
-    BSD
+
+BSD
       
