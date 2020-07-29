@@ -181,8 +181,6 @@ And also to output all or part of the payload accordingly:
 
 Run the example application  
 --  
-Make sure to locally install the plugin first. Refer to the README file in the root folder.  
-Finally, start the example application  
   
     npm install 
     npm start

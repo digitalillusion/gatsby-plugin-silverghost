@@ -24,6 +24,14 @@ function matchByType(type, definitions) {
   }
 }
 
+export function splitPathnameParts(pathname) {
+  if (!pathname) {
+    return [];
+  }
+  let parts = pathname.split(/[/#?]/).filter(part => part !== "");
+  return parts;
+}
+
 /**
  * Contains common Actions behavior
  */
