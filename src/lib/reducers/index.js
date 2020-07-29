@@ -172,6 +172,9 @@ export const accumulate = reducer => {
 
   return (state, action) => {
     let reduction = reducer(state, action);
+    if (!action.definition) {
+      return reduction;
+    }
     if (reduction === state) {
       return state;
     }
@@ -223,6 +226,9 @@ export const accumulate = reducer => {
 export const collect = reducer => {
   return (state, action) => {
     let reduction = reducer(state, action);
+    if (!action.definition) {
+      return reduction;
+    }
     if (reduction === state) {
       return state;
     }

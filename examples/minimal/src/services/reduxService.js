@@ -1,7 +1,26 @@
 import { Actions } from "../actions/createActions"
 
-function handleHomePage(action, params, next) {
-  console.log(action, params)
+function handleWelcome(store, action, params, next) {
+  let request = params[0]
+
+  let payload = {}
+  switch (request.event) {
+    case "change":
+      const current = store.getState()[Actions.WELCOME.getReducerKey()].payload
+      payload.timestamp = current[request.channel].timestamp
+      payload.message = current[request.channel].message || ""
+      payload.channel = request.channel
+      break
+    case "submit":
+    default:
+      payload = request.message ? request : payload
+  }
+  return next(
+    Actions.WELCOME.propagate(action, {
+      params: [request.channel],
+      payload
+    })
+  )
 }
 
 export const reduxService = store => next => action => {
@@ -10,8 +29,8 @@ export const reduxService = store => next => action => {
   let params = Actions.getParams(matched)
 
   switch (matched.type) {
-    case Actions.HOME_PAGE.REQUEST:
-      handleHomePage(action, params, next)
+    case Actions.WELCOME.REQUEST:
+      handleWelcome(store, matched, params, next)
       break
     default:
   }

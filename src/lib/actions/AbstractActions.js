@@ -1,5 +1,29 @@
 import { isEmpty } from "../functions";
 
+function matchByPathname(pathname, definitions) {
+  for (let definition of definitions) {
+    if (definition.isMatching(pathname)) {
+      try {
+        definition.getPathgroupParams(pathname, true, true, true);
+        return definition;
+      } catch (e) {
+        if (e.code !== "PGP_MISMATCH") {
+          console.error(e.msg);
+        }
+        continue;
+      }
+    }
+  }
+}
+
+function matchByType(type, definitions) {
+  for (let definition of definitions) {
+    if (type === definition.REQUEST || type === definition.DATA) {
+      return definition;
+    }
+  }
+}
+
 /**
  * Contains common Actions behavior
  */

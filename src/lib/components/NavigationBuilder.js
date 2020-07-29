@@ -93,12 +93,12 @@ export class NavigationBuilder {
   }
 
   /**
-   * Register a link for navigation
+   * Register a link for navigation or a button click
    * @param action The action to trigger on user interaction
    * @param options ajax, mapper etc...
    * @returns {NavigationBuilder}
    */
-  withHRef(action, options = {}) {
+  withEvent(action, options = {}) {
     this.hrefs[action.TYPE] = {
       action: action,
       options: Object.assign(
@@ -255,7 +255,7 @@ export class NavigationBuilder {
   }
 
   /**
-   * @returns {{getTree: (function(): []), nodeOnSelect: (function(): function(*): Promise<unknown> | Promise<unknown[]>), tabSelector: tabSelector, getPaneProperties: (function(*): {}), paneOnClick: paneOnClick, hrefOnClick: (function(...[*]): function(*=): Promise<unknown[]>), getTabProperties: (function(): {}), tabOnClick: tabOnClick, nodeOnExpand: (function(): function(*): Promise<unknown> | Promise<unknown[]>)}} The navigation object
+   * @returns {{getTree: (function(): []), tabSelector: tabSelector, getPaneProperties: (function(*): {}), paneOnEvent: paneOnEvent, onEvent: (function(...[*]): function(*=): Promise<unknown[]>), getTabProperties: (function(): {}), tabOnEvent: tabOnEvent}} The navigation object
    */
   build() {
     let builder = this;
@@ -439,7 +439,7 @@ export class NavigationBuilder {
        * @param rendered Whether the pane is already rendered or not (Default: false)
        * @return {*}
        */
-      paneOnClick: (name, expanded = true, rendered = false) => {
+      paneOnEvent: (name, expanded = true, rendered = false) => {
         let tab = getSelectedTab();
         let pane = tab.panes[name];
         let hasPersistentRender = pane && pane.options.ajax && rendered;
@@ -463,7 +463,7 @@ export class NavigationBuilder {
       /**
        * The handler of a tab select user interaction
        */
-      tabOnClick: function(name, rendered) {
+      tabOnEvent: function(name, rendered) {
         builder.selectedTab = name;
         localStorage.setItem("NavigationBuilder.selectedTab", name);
         let hasPersistentRender = builder.tabs[name].options.ajax && rendered;
@@ -495,9 +495,9 @@ export class NavigationBuilder {
       },
 
       /**
-       * The handler of a user interaction with a navigation link
+       * The handler of a user interaction with a navigation link or a button
        */
-      hrefOnClick: (...actions) => {
+      onEvent: (...actions) => {
         return target => {
           let promises = [];
           for (let action of actions) {
@@ -533,12 +533,7 @@ export class NavigationBuilder {
           }
           return Promise.all(promises);
         };
-      },
-
-      nodeOnSelect: () => nodeId =>
-        onNodeInteraction(builder.treeOnSelectActions[nodeId]),
-      nodeOnExpand: () => nodeId =>
-        onNodeInteraction(builder.treeOnExpandActions[nodeId])
+      }
     };
 
     return navigation;

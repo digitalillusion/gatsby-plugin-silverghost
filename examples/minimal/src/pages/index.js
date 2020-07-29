@@ -1,16 +1,81 @@
 import React from "react"
-import { Link } from "gatsby"
+import { NavigationBuilder } from "gatsby-plugin-silverghost/lib/components/NavigationBuilder"
 
-import Layout from "../components/layout"
+import {useSelector, useStore} from "react-redux";
+import {Actions} from "../actions/createActions";
 
-const IndexPage = () => (
-  <Layout>
-    <h1>Hi people</h1>
-    <p>Welcome to your new Gatsby site.</p>
-    <p>Now go build something great.</p>
-    <Link to="/page-2/">Go to page 2</Link> <br />
-    <Link to="/using-typescript/">Go to "Using TypeScript"</Link>
-  </Layout>
-)
+const HomePage = () =>  {
+    let store = useStore();
+    const welcome = useSelector(state => state.welcome, [])
+    const channel = welcome.params[0]
 
-export default IndexPage
+    let navigationBuilder = new NavigationBuilder(store);
+
+    let navigation = navigationBuilder
+        .withEvent(Actions.WELCOME, { mapper: (action, input) => {
+            const event = input.target.event;
+            const target = input.target.target;
+            switch (event) {
+                case "change" :
+                    return Object.assign(action, { params : [{
+                        event,
+                        channel: target.currentTarget.value
+                    }] })
+                case "submit" :
+                default:
+                    target.preventDefault()
+                    const formData = new FormData(target.currentTarget)
+                    return Object.assign(action, { params: [{
+                        event,
+                        timestamp: new Date().toString(),
+                        channel: formData.get("channel"),
+                        message: formData.get("message")
+                    }] })
+            }
+        }, ajax: true})
+        .build()
+
+   const isRoomChannel = channel === "room"
+   return (
+        <div>
+            <h1>SilverGhost minimal example</h1>
+            <p>Demonstrating how reductions are accumulated into redux state according to action parameters</p>
+            <form key={channel} onSubmit={target => navigation.onEvent(Actions.WELCOME)({ event: "submit", target})} autoComplete="off">
+                <label htmlFor="message">Set message of the day: </label>
+                <p>
+                    <input type="radio" name="channel" value="room" {...(isRoomChannel ? { defaultChecked: true} : {})}
+                           onChange={target => navigation.onEvent(Actions.WELCOME)({ event: "change", target})} />
+                    <label htmlFor="channel">Room</label>
+                    <input type="radio" name="channel" value="broadcast" {...(!isRoomChannel ? { defaultChecked: true} : {})}
+                           onChange={target => navigation.onEvent(Actions.WELCOME)({ event: "change", target})} />
+                    <label htmlFor="channel">Broadcast</label>
+                </p>
+                <p>
+                    <input id="message" name="message" type="text" defaultValue={welcome.payload[channel].message} />
+                    <input type="submit" value="Send" />
+                </p>
+            </form>
+            <hr />
+            <h3>Room Message</h3>
+            <table>
+                <tbody>
+                    {welcome.payload.room && <tr>
+                        <td>{welcome.payload.room.timestamp}</td>
+                        <td>{welcome.payload.room.message}</td>
+                    </tr>}
+                </tbody>
+            </table>
+            <h3>Broadcast Message</h3>
+            <table>
+                <tbody>
+                    {welcome.payload.broadcast && <tr>
+                        <td>{welcome.payload.broadcast.timestamp}</td>
+                        <td>{welcome.payload.broadcast.message}</td>
+                    </tr>}
+                </tbody>
+            </table>
+        </div>
+    )
+}
+
+export default HomePage

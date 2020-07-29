@@ -5,15 +5,23 @@ import {
   DefaultReducer
 } from "gatsby-plugin-silverghost/lib/reducers"
 
-const initialState = {
-  message: "Server says hello"
-}
+const initialMessage = "Server says hello"
+const initialState = Actions.WELCOME.instance({
+  params: ["broadcast", initialMessage],
+  payload: {
+    broadcast: {
+      timestamp: new Date().toString(),
+      message: initialMessage,
+      channel: "broadcast"
+    },
+    room: {}
+  }
+})
 
-const reducer = () =>
-  combineReducers({
-    [Actions.HOME_PAGE.getReducerKey()]: accumulate(
-      DefaultReducer.instance(initialState, Actions.HOME_PAGE)
-    )
-  })
+const rootReducer = combineReducers({
+  [Actions.WELCOME.getReducerKey()]: accumulate(
+    DefaultReducer.instance(initialState, Actions.WELCOME)
+  )
+})
 
-export default reducer
+export default rootReducer

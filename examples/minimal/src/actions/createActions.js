@@ -4,12 +4,8 @@ import {
 } from "gatsby-plugin-silverghost/lib/actions"
 
 const definitions = {
-  HOME_PAGE: makeAction("@@App/HOME_PAGE", "home", "/:section/:subsection", {
-    section: ["home", "reference"],
-    subsection: [
-      ["presentation", "links"],
-      ["store", "actions", "reducers"]
-    ]
+  WELCOME: makeAction("@@App/WELCOME", "welcome", "/:channel/:message", {
+    channel: ["room", "broadcast"]
   })
 }
 export const Actions = AbstractActions.instance(definitions)
