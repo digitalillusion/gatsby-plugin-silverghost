@@ -67,11 +67,12 @@ If you want to modify this plugin and try the examples you need to install this 
 
 Finally, if there are changes made in the plugin code, in order to redeploy to the example you must delete the existing tgz archive from local_modules, then repeat step 1 and then perform a clean install of the example dependencies.    
   
-> A possible way to perform the clean install is to remove the interested line, performing `npm install`, adding again the dependency on local_modules in package.json and performing another `npm install`.  
+> A possible way to perform the clean install is to remove the yarn.lock file and then execute `yarn install`.  
   
 When the plugin is installed in local_modules, you can install and start the examples from theiir respective folders:    
     
- - [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal): Demonstrating how reductions accumulate into redux state according to action parameters     
+ - [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal): Demonstrating how reductions accumulate into redux state according to action parameters
+ - [list](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/list): Demonstrating how reduction split into redux state, initialization through URL parameters and list filtering, sorting and pagination     
       
 License 
 -- 

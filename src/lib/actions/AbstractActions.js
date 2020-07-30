@@ -69,7 +69,7 @@ export class AbstractActions {
     if (
       action.payload.location.pathname &&
       (definition = matchByPathname(
-        action.payload.location.pathname,
+        action.payload.location.pathname + (action.payload.location.hash || ""),
         AbstractActions.definitions
       ))
     ) {
@@ -90,6 +90,7 @@ export class AbstractActions {
       let matched = AbstractActions.getDefinition(action);
 
       if (matched) {
+        matching.params = AbstractActions.getParams(action);
         matching.type = matched.REQUEST;
       }
     }
@@ -104,14 +105,7 @@ export class AbstractActions {
     if (!action) {
       return [];
     }
-    let definition = action.type
-      ? matchByType(action.type, AbstractActions.definitions)
-      : action.payload
-      ? matchByPathname(
-          action.payload.location.pathname,
-          AbstractActions.definitions
-        )
-      : undefined;
+    let definition = AbstractActions.getDefinition(action);
     let params = [];
     if (!definition) {
       return [];

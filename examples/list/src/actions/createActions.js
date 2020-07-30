@@ -4,7 +4,7 @@ import {
 } from "gatsby-plugin-silverghost/lib/actions"
 
 const definitions = {
-  WELCOME: makeAction("@@App/WELCOME", "welcome", "/:channel", {
+  WELCOME: makeAction("@@App/WELCOME", "welcome", "/welcome/:channel/:query", {
     channel: ["room", "broadcast"]
   })
 }

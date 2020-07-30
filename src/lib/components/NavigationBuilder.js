@@ -5,7 +5,21 @@ import { TreeViewNode } from "./TreeViewNode";
  * Builds a tab/pane/tree/href navigation behaviour
  */
 export class NavigationBuilder {
+  static historyUnsubscribe = null;
+
   constructor(store, history = null, authorizations = null) {
+    if (history && !NavigationBuilder.historyUnsubscribe) {
+      const dispatchLocationChange = location =>
+        store.dispatch({ type: "@@router/LOCATION_CHANGE", payload: location });
+      NavigationBuilder.historyUnsubscribe = history.listen(location =>
+        dispatchLocationChange(location)
+      );
+      dispatchLocationChange({
+        action: "PUSH",
+        location: window.location
+      });
+    }
+
     this.tabs = {};
     this.treeRoot = { children: [] };
     this.lastTab = null;
@@ -273,9 +287,9 @@ export class NavigationBuilder {
     function submitAction(context, mappingContext) {
       let {
         params = [],
-        pagination = {},
-        sorting = {},
-        filter = [],
+        pagination = undefined,
+        sorting = undefined,
+        filter = undefined,
         exportData = undefined,
         ajax = false
       } = mappingContext;

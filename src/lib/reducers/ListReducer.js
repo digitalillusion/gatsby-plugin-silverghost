@@ -2,9 +2,35 @@ import { equalGraphs, flatMap } from "../functions";
 
 export default class ListReducer {
   /**
+   * Return a list out of an array, useful for initializing inital state
+   * @param array
+   * @returns {Object} A reduced list of the array
+   */
+  static toList(
+    array,
+    pagination = { number: 0, size: 10 },
+    filter = [],
+    sorting = [null, ""]
+  ) {
+    pagination.totalElements = array.length;
+    return {
+      page: array,
+      list: array,
+      nextPage: {
+        number: null,
+        timestamp: new Date().getTime()
+      },
+      psfState: {
+        pagination: pagination,
+        filter: Array.isArray(filter) ? filter : [filter],
+        sorting: sorting
+      }
+    };
+  }
+  /**
    * @param initialState
    * @param actionDefinitions
-   * @returns {Function} For the given action definitions, return the list reduction or return the initialstate otherwise
+   * @returns {Function} For the given action definitions, return the welcome reduction or return the initialstate otherwise
    */
   static instance(initialState, ...actionDefinitions) {
     const reduction = (state, action) => {
@@ -12,6 +38,7 @@ export default class ListReducer {
 
       let collectKey = null;
       let actionPayload = action.payload;
+      let psfState = action.payload.psfState || {};
       if (
         !Array.isArray(actionPayload) &&
         Object.keys(actionPayload).length === 1
@@ -19,17 +46,36 @@ export default class ListReducer {
         collectKey = Object.keys(actionPayload)[0];
         actionPayload = actionPayload[collectKey];
       }
+      if (
+        !Array.isArray(actionPayload) &&
+        actionPayload.page &&
+        actionPayload.list &&
+        actionPayload.psfState &&
+        actionPayload.nextPage
+      ) {
+        actionPayload = actionPayload.page;
+      }
+
       if (!Array.isArray(actionPayload)) {
-        throw "The action payload must be an array or an object with a single property where the key is the collect key and the value an array";
+        throw "The action payload must be a ListReducer result, an array or an object with a single property where the key is the collect key and the value an array";
       }
 
       let reduced = {
         type: action.type,
         payload: { page: actionPayload, list: [] },
         pages: reducedState.pages || {},
-        pagination: action.pagination || {},
-        sorting: action.sorting || [null, ""],
-        filter: action.filter || {},
+        pagination:
+          typeof action.pagination.number != "undefined" &&
+          typeof action.pagination.size != "undefined" &&
+          typeof action.pagination.totalElements != "undefined"
+            ? action.pagination
+            : typeof psfState.pagination.number != "undefined" &&
+              typeof psfState.pagination.size != "undefined" &&
+              typeof psfState.pagination.totalElements != "undefined"
+            ? psfState.pagination
+            : {},
+        sorting: action.sorting || psfState.sorting || [null, ""],
+        filter: action.filter || psfState.filter || [],
         params: action.params
       };
 

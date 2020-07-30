@@ -10,7 +10,7 @@ const initialState = Actions.WELCOME.instance({
   params: ["broadcast", initialMessage],
   payload: {
     broadcast: {
-      timestamp: new Date().toString(),
+      timestamp: new Date(),
       message: initialMessage,
       channel: "broadcast"
     },

@@ -1,8 +1,7 @@
-import { isEmpty, isObject } from "../functions";
+import { isObject } from "../functions";
 import listReducer from "./ListReducer";
 
 export class DefaultReducer {
-
   /**
    * @param initialState
    * @param actionDefinitions
@@ -49,7 +48,7 @@ export const chain = (...reducers) => {
   return (state, action) => {
     for (let reducer of reducers) {
       let reduction = reducer(state, action);
-      if (reduction === undefined) {
+      if (typeof reduction === "undefined") {
         continue;
       }
       return reduction;
@@ -89,6 +88,11 @@ export const split = (actionDefinitions, ...reducers) => {
             responses.length +
             " responses in the action payload"
         );
+      }
+      if (typeof state === "undefined") {
+        let combinedState = {};
+        reducers.forEach(r => Object.assign(combinedState, r(state, action)));
+        return combinedState;
       }
       return state;
     }
@@ -172,11 +176,8 @@ export const accumulate = reducer => {
 
   return (state, action) => {
     let reduction = reducer(state, action);
-    if (!action.definition) {
+    if (!action.definition || reduction === state) {
       return reduction;
-    }
-    if (reduction === state) {
-      return state;
     }
 
     let definition = action.definition;
@@ -226,11 +227,8 @@ export const accumulate = reducer => {
 export const collect = reducer => {
   return (state, action) => {
     let reduction = reducer(state, action);
-    if (!action.definition) {
+    if (!action.definition || reduction === state) {
       return reduction;
-    }
-    if (reduction === state) {
-      return state;
     }
 
     let definition = action.definition;

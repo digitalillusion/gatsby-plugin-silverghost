@@ -1,23 +1,24 @@
 import { Actions } from "../actions/createActions"
 
-function handleWelcome(state, action, params, next) {
-  let request = params[0]
+function handleWelcome(state, action, next) {
+  let [channel, request] = action.params
 
-  let payload = {}
-  switch (request.event) {
+  let payload
+  switch (request ? request.event : "") {
     case "change":
-      const current = state.payload
-      payload.timestamp = current[request.channel].timestamp
-      payload.message = current[request.channel].message || ""
-      payload.channel = request.channel
+      const current = state.payload[channel]
+      payload = {
+        timestamp: current.timestamp,
+        message: current.message || ""
+      }
       break
     case "submit":
     default:
-      payload = request.message ? request : payload
+      payload = request.message ? request : {}
   }
   return next(
     Actions.WELCOME.propagate(action, {
-      params: [request.channel],
+      params: [channel],
       payload
     })
   )
@@ -26,12 +27,11 @@ function handleWelcome(state, action, params, next) {
 export const reduxService = store => next => action => {
   // Perform reduction logic
   let matched = Actions.match(action)
-  let params = Actions.getParams(matched)
 
   switch (matched.type) {
     case Actions.WELCOME.REQUEST:
       const state = store.getState()[Actions.WELCOME.getReducerKey()]
-      handleWelcome(state, matched, params, next)
+      handleWelcome(state, matched, next)
       break
     default:
   }
