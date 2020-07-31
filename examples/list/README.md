@@ -39,14 +39,14 @@ Along with payload and params, the actions provide other fields that can be popu
 	 - totalElements: the count of rows that need to be paged
  - sorting: an array containing the name of the field to sort and the direction, *asc* for ascendant or *desc* for descendant
 
-> Sorting on multiple fields is not directly supported but it can be obtained by defining an hidden field that aggregates the respective weight of the rows according to the fields to sort onto. Sorting can afterward be applied to this hidden field
+> Sorting on multiple fields is unsupported, but it can be obtained by defining a hidden field that aggregates the respective weight of the rows according to the fields to sort onto. Sorting can afterward be applied to this hidden field.
 
 The action fields descrivibed above are all handled by a specific reducer called `ListReducer` which we will focus on next.
 
       
 **Root reducer**  
   
-The root reducer deals with both setting a message of the day and searching messages, on two pages (one for each channel). Therefore, it uses a `DefaultReducer` for the message of the day and a `ListReducer` for the messages search and the two are first accumulated and then split.
+The root reducer deals with both setting a message of the day and searching messages, on two pages (one for each channel). Therefore, it uses a `DefaultReducer` for the message of the day and a `ListReducer` for the search. The two reducers' result go through accumulation first and then split.
 
     const rootReducer = combineReducers({  
       [Actions.WELCOME.getReducerKey()]: accumulate(  
@@ -58,9 +58,9 @@ The root reducer deals with both setting a message of the day and searching mess
       )  
     })
 
-In order to have the two sections of the view updated by the same action, the payload is split among the two reducers. As seen in the [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal) example, the state is once again accumulated by the `:channel` path group parameter.
+In order to have the two sections of the view updated by the same action, the payload gets split among the two reducers. As seen in the [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal) example, the state once again accumulates by the `:channel` path group parameter.
 
-> The initial state is the global state for all reducers; it must be coherent with the structure of the state that the reducer will create subsequently. Even if it is assigned to both reducers, it will be applied by the one that gets called first, so it must be the same constant object for every reducer instantiation.
+> The initial state is the global state for all reducers; it must be coherent with the structure of the state the reducer will create subsequently. Even if it is assigned to both reducers, it will be applied by the one that gets called first, so it must be the same constant object for every reducer instantiation.
 
 The order of concatenation of the macros is relevant. Infact calling accumulate on a split payload would cause the redux state to be populated as follows, which is our case:
 	
@@ -80,9 +80,9 @@ One way of organizing the structure of the state may result more elegant than th
   
 **Reduction services**  
   
-The reduction service contains a simulated call to a server that encodes the action information about filter, pagination and sorting and return a result from a local dataset instead. This is done through the library function `encodeSearchQuery`.
+The reduction service contains a simulated call to a server that encodes the action information about the filter, pagination and sorting and return a result from a local dataset instead. This is done through the library function `encodeSearchQuery`.
 
-The reduction services propagates an action which has a payload composed of an array of two elements that will be split on two the reducers: an object containing the query string for the `DefaultReducer` and an object representing a list for the `ListReducer`. In the event of setting the message of the day, for optimal performance, the list of messages is recovered from the state and in the event of searching the list of message the converse happens.
+The reduction services propagates an action which has a payload composed of an array of two elements that will be split on two the reducers: an object containing the query string for the `DefaultReducer` and an object representing a list for the `ListReducer`. In the event of setting the message of the day, for optimal performance, the list of messages gets recovered from the state and in the event of searching the list of message the converse happens.
 
 > There is no guarantee for the previous state to be defined. There is a condition under which the accumulation must restart: change of pathgroup parameters. Such parameters identify several paths whose state must not be mixed. If accumulation didn't restart, there would end up the old portion of state from the previous path merged with the new portion of state from the action having changed pathgroup parameters, which is incoherent and inconvenient. This is the reason why the page resets when we change channel, but not when we just go back to index. 
 
@@ -129,8 +129,8 @@ It will dispatch a special `@@router/LOCATION_CHANGE` action request that will b
 
 > Make sure that `NavigationBuilder` construction is present before you attempt to retrieve data from the redux state or else such data will not be up to date
 
-The welcome page shows a input capable of setting the message of the day and a filtered, paginated, sorted list of welcome messages from the currently selected channel.
-The navigation event makes a request by filling the necessary fields on the action, depending on the event that occurred
+The welcome page shows a text input box capable of setting the message of the day and a filtered, paginated, sorted list of welcome messages from the currently selected channel.
+The navigation event makes a request by filling the necessary fields on the action, depending on the event that occurs
 
     const navigation = navigationBuilder
         .withEvent(Actions.WELCOME, {
