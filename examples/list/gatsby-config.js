@@ -1,7 +1,7 @@
 module.exports = {
   siteMetadata: {
     title: `SilverGhost list example`,
-    description: `Demonstrating how reduction split into redux state, initialization through URL parameters and list filtering, sorting and pagination`,
+    description: `Demonstrating how reductions split into redux state, initialization through URL parameters and list filtering, sorting and pagination`,
     author: `@digitalillusion`
   },
   plugins: [

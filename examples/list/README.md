@@ -46,7 +46,7 @@ The action fields descrivibed above are all handled by a specific reducer called
       
 **Root reducer**  
   
-The root reducer deals with both setting a message of the day and searching messages, on two pages (one for each channel). Therefore, it uses a `DefaultReducer` for the message of the day and a `ListReducer` for the search. The two reducers' result go through accumulation first and then split.
+The root reducer deals with both setting a message of the day and searching messages, on two pages (one for each channel). Therefore, it uses a `DefaultReducer` for the message of the day and a `ListReducer` for the search. The two reducers' result go through accumulation first and then **split**.
 
     const rootReducer = combineReducers({  
       [Actions.WELCOME.getReducerKey()]: accumulate(  

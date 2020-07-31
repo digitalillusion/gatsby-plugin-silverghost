@@ -72,7 +72,7 @@ Finally, if there are changes made in the plugin code, in order to redeploy to t
 When the plugin is installed in local_modules, you can install and start the examples from theiir respective folders:    
     
  - [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal): Demonstrating how reductions accumulate into redux state according to action parameters
- - [list](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/list): Demonstrating how reduction split into redux state, initialization through URL parameters and list filtering, sorting and pagination     
+ - [list](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/list): Demonstrating how reductions split into redux state, initialization through URL parameters and list filtering, sorting and pagination     
       
 License 
 -- 

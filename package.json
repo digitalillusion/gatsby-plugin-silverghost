@@ -1,6 +1,6 @@
 {
   "name": "gatsby-plugin-silverghost",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "Gatsby plugin offering a simple action framework based on redux",
   "keywords": [
     "gatsby",

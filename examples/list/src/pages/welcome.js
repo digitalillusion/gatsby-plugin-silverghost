@@ -98,7 +98,7 @@ const WelcomeMessage = () => {
                 </p>
                 {list.psfState && <p>
                     Page <input name="page" type="number" defaultValue={list.psfState.pagination.number + 1}
-                                min={1} max={Math.ceil(list.psfState.pagination.totalElements/list.psfState.pagination.size)}
+                                min={1} max={Math.max(1, Math.ceil(list.psfState.pagination.totalElements/list.psfState.pagination.size))}
                                 onChange={target => navigation.onEvent(Actions.WELCOME)({ event : "search", target: target.currentTarget.form })} />
                 </p>}
                 <table>

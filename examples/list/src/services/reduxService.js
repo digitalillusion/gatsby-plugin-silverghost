@@ -1,6 +1,7 @@
 import { Actions } from "../actions/createActions"
 import { dataSet } from "../state/reducer"
 import { encodeSearchQuery } from "gatsby-plugin-silverghost/lib/actions/query/localEncoder"
+import { isEmpty } from "gatsby-plugin-silverghost/lib/functions"
 
 function simulateServerCall(state, action) {
   let [channel, query, request] = action.params
@@ -21,6 +22,9 @@ function simulateServerCall(state, action) {
       sorting: ["timestamp", "desc"]
     }
     Object.assign(action, state.psfState ? state.psfState : newPsfState)
+    if (!isEmpty(query)) {
+      action.filter[0].value = query
+    }
     return encodeSearchQuery(channelData, action)
   }
 }

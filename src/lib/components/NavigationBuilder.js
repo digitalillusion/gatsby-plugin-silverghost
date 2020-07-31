@@ -14,10 +14,12 @@ export class NavigationBuilder {
       NavigationBuilder.historyUnsubscribe = history.listen(location =>
         dispatchLocationChange(location)
       );
-      dispatchLocationChange({
-        action: "PUSH",
-        location: window.location
-      });
+      if (typeof window !== "undefined") {
+        dispatchLocationChange({
+          action: "PUSH",
+          location: window.location
+        });
+      }
     }
 
     this.tabs = {};
