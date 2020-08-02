@@ -1,7 +1,7 @@
 
   
 # gatsby-plugin-silverghost list example    
-Demonstrating initialization through URL parameters, list filtering, sorting and pagination
+Demonstrating how reductions split into redux state, initialization through URL parameters and list filtering, sorting and pagination
     
 Configuration 
 --    
@@ -60,7 +60,7 @@ The root reducer deals with both setting a message of the day and searching mess
 
 In order to have the two sections of the view updated by the same action, the payload gets split among the two reducers. As seen in the [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal) example, the state once again accumulates by the `:channel` path group parameter.
 
-> The initial state is the global state for all reducers; it must be coherent with the structure of the state the reducer will create subsequently. Even if it is assigned to both reducers, it will be applied by the one that gets called first, so it must be the same constant object for every reducer instantiation.
+> The initial state is the global state for all reducers; it must be coherent with the structure of the state the reducers will create subsequently. Even if it is assigned to several reducers, it will be applied by the one which gets called first, so it must be the same constant object for every reducer instantiation.
 
 The order of concatenation of the macros is relevant. Infact calling accumulate on a split payload would cause the redux state to be populated as follows, which is our case:
 	
@@ -69,22 +69,22 @@ The order of concatenation of the macros is relevant. Infact calling accumulate 
       broadcast: [defaultPayload2, listPayload2]   
     }
 
-Conversely, if split was applied before accumulate, the state would result like this:
+Conversely, if split applies to accumulate, the state would result like this:
 
     [     
       { room: defaultPayload1, broadcast: defaultPayload2 },
       { room: listPayload1, broadcast: listPayload2 }
     ]
 
-One way of organizing the structure of the state may result more elegant than the other, depending on how the view is implemented.
+One way of organizing the structure of the state may result more elegant than the other, depending on how the view implementation.
   
 **Reduction services**  
   
 The reduction service contains a simulated call to a server that encodes the action information about the filter, pagination and sorting and return a result from a local dataset instead. This is done through the library function `encodeSearchQuery`.
 
-The reduction services propagates an action which has a payload composed of an array of two elements that will be split on two the reducers: an object containing the query string for the `DefaultReducer` and an object representing a list for the `ListReducer`. In the event of setting the message of the day, for optimal performance, the list of messages gets recovered from the state and in the event of searching the list of message the converse happens.
+The reduction services propagates an action which has a payload composed of an array of two elements that will be split on the two reducers: an object containing the query string for the `DefaultReducer` and an object representing a list for the `ListReducer`. In the event of setting the message of the day, for optimal performance, the list of messages gets recovered from the state and in the event of searching the list of message the converse happens.
 
-> There is no guarantee for the previous state to be defined. There is a condition under which the accumulation must restart: change of pathgroup parameters. Such parameters identify several paths whose state must not be mixed. If accumulation didn't restart, there would end up the old portion of state from the previous path merged with the new portion of state from the action having changed pathgroup parameters, which is incoherent and inconvenient. This is the reason why the page resets when we change channel, but not when we just go back to index. 
+> There is no guarantee for the previous state to be defined. There is a condition under which the accumulation must restart: change of pathgroup parameters. Such parameters identify several paths whose state must not be mixed. If accumulation didn't restart, there would end up a portion of the old state (from the previous path) merged with a portion of the new state (from the action having changed pathgroup parameters), which is incoherent and inconvenient. This is the reason why the page resets when we change channel, but not when we just go back to index. 
 
     function handleWelcome(state, action, next) {
       let [channel, query, request] = action.params
@@ -120,7 +120,8 @@ As always, accumulate macro avoids to bother about which is the part of the redu
 **View**  
   
 On the index page, the example presents two links by mean of which to search the welcome messages of the channel "room" rather than those of the channel "broadcast" using a predefined search keyword in the latter case.
-Upon transitions coming from outside the framework, like clicking such links, we need to match the landing location to an action (rather then showing the content from the redux state). This way the action parameters are updated reflecting the ones in the URL and the framework is bootstrapped
+Upon transitions coming from outside the framework, like clicking such links, we need to match the landing location to an action (rather then showing the content from the redux state). This way the action parameters are updated reflecting the ones in the URL and the framework is bootstrapped.
+
 This magic is done inside `NavigationBuilder` as soon as we pass the router history:
 
     new NavigationBuilder(store, globalHistory)

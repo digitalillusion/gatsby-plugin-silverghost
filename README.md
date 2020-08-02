@@ -15,11 +15,6 @@ In order to understand how to use the framework, please refer to the examples. H
 
         
     module.exports = {  
-      siteMetadata: {  
-        title: `SilverGhost minimal example`,  
-        description: `Demonstrating how reductions accumulate into redux state according to action parameters`,  
-        author: `@digitalillusion`  
-      },  
       plugins: [  
         {  
           resolve: `gatsby-plugin-silverghost`,  
@@ -43,7 +38,7 @@ In order to understand how to use the framework, please refer to the examples. H
 Install 
 --      
 
-    npm install --save gatsby-plugin-silverghost react-redux redux    
+    yarn add gatsby-plugin-silverghost react-redux redux    
 
  
 Installing the module locally 
@@ -77,7 +72,7 @@ When the plugin is installed in local_modules, you can install and start the exa
 License 
 -- 
 
-MIT    
+BSD    
       
 References 
 --      
