@@ -96,11 +96,16 @@ A way to define a root reducer is to use [combineReducers](https://redux.js.org/
  In this minimal example we have only one action and we request to **accumulate** the state changes. The `DefaultReducer` is the simplest reducer you can imagine: For the given action definitions (our *welcome* action), return the matching runtime action as-is or return the state otherwise (initialState will be returned upon initialization). 
  
 
-> In order to correctly integrate with the framework, initialState must be created as an action, with at least two properties, params and payload.
+> In order to correctly integrate with the framework, initialState must be created either empty, or as an action with at least two properties, params and payload.
 
-> *accumulate* effect is to create a structure based on action path groups. For our action, the redux state at the key *welcome* will be split in two sub-keys, one for each pathgroup: *room* and *broadcast*. This allows an action at a given time (with some given pathgroup parameters) to make non interfering changes on a specifc sub-key, without the need to bother about other sub-keys; this is trivial in this simple scenario but being capable of performing this kind of processing automatically greatly improves readability of written code as complexity rises
+*accumulate* effect is to create a structure based on action path groups. For our action, the redux state at the key *welcome* will be split in two sub-keys, one for each pathgroup: *room* and *broadcast*. This allows an action at a given time (with some given pathgroup parameters) to make non interfering changes on a specifc sub-key, without the need to bother about other sub-keys; this is trivial in this simple scenario but being capable of performing this kind of processing automatically greatly improves readability of written code as complexity rises.
 
-What this code is doing will be clearer once we give a look at the middleware:
+    {
+        room: payload1,
+        broadcast: payload2
+    }
+
+Above, a representation of the accumulated state. The *room* part has been built by a WELCOME action with pathgroup param `channel` set to `room` and the *broadcast* part accumulated when the same param was set to `broadcast`.
 
 **Reduction services**
 
@@ -185,28 +190,30 @@ event that happened (a radio button click here above).
 
 The code builds the navigation as follows:
 
-    case "change" :
-        return Object.assign(action, { params : [
-            target.currentTarget.value,
-            { event }
-        ] })
-    case "submit" :
-    default:
-        const formData = new FormData(target.currentTarget)
-        return Object.assign(action, { params: [
-            formData.get("channel"),
-            {
-                event,
-                timestamp: new Date(),
-                message: formData.get("message")
-            }
-        ] })
-        
+    switch(event)
+        case "change" :
+            return Object.assign(action, { params : [
+                target.currentTarget.value,
+                { event }
+            ] })
+        case "submit" :
+        default:
+            const formData = new FormData(target.currentTarget)
+            return Object.assign(action, { params: [
+                formData.get("channel"),
+                {
+                    event,
+                    timestamp: new Date(),
+                    message: formData.get("message")
+                }
+            ] })
+    }      
+      
 The above code maps an event toward an action that depends on the input context, which assembles a mapping context and the curry from the invocation.
 It is executed when the user triggers an event correspondent to our *welcome* action, right before the execution goes to
 the reduction services for matching and processing. 
 > The mapper must return the action passed in so that the matching occurs; furthermore it can add several `params` to the request,
-as needed by the processing phase  
+as needed by the processing phase. It will typically add one param containing the request object.  
 
  
 Run the example application  
