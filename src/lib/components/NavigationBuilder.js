@@ -8,20 +8,6 @@ export class NavigationBuilder {
   static historyUnsubscribe = null;
 
   constructor(store, history = null, authorizations = null) {
-    if (history && !NavigationBuilder.historyUnsubscribe) {
-      const dispatchLocationChange = location =>
-        store.dispatch({ type: "@@router/LOCATION_CHANGE", payload: location });
-      NavigationBuilder.historyUnsubscribe = history.listen(location =>
-        dispatchLocationChange(location)
-      );
-      if (typeof window !== "undefined") {
-        dispatchLocationChange({
-          action: "PUSH",
-          location: window.location
-        });
-      }
-    }
-
     this.tabs = {};
     this.treeRoot = { children: [] };
     this.lastTab = null;
@@ -31,6 +17,29 @@ export class NavigationBuilder {
     this.store = store;
     this.history = history;
     this.authorizations = authorizations;
+
+    if (history) {
+      const dispatchLocationChange = location => {
+        this.store.dispatch({
+          type: "@@router/LOCATION_CHANGE",
+          payload: location
+        });
+      };
+      this.refresh = function() {
+        if (typeof window !== "undefined") {
+          dispatchLocationChange({
+            action: "PUSH",
+            location: window.location
+          });
+        }
+      };
+      if (!NavigationBuilder.historyUnsubscribe) {
+        NavigationBuilder.historyUnsubscribe = this.history.listen(location => {
+          dispatchLocationChange(location);
+        });
+        this.refresh();
+      }
+    }
   }
 
   /**
@@ -383,6 +392,14 @@ export class NavigationBuilder {
     }
 
     let navigation = {
+      /**
+       * Explicitely triggers a new action dispatch on the current location, so that reducers are applied again.
+       * It may be useful after certain interdependent actions, like ACTION1 draws a page and afterward ACTION2 logs in, which would
+       * need in turn a refresh of the navigation in order that ACTION1 draws the page again.
+       */
+      refresh: () => {
+        builder.refresh();
+      },
       /**
        * @returns {Array} The properties used to render panes
        */
