@@ -37,7 +37,7 @@ It exports an `Actions` class having a `Actions.WELCOME` static field that repre
 		{ pathGroupKey : [ ...parameterValues ] }
 	
 
-> **Pathgroups are useful when they bind to a structure, as it will reflect the structure of the redux state afterwards.** Moreover, a path parameter which has an associated pathgroup will always have a value
+> **Pathgroups are useful when they bind to a structure, as it will reflect the structure of the redux state afterwards.** Moreover, a path parameter which has an associated pathgroup will always have a value, either from the respective action parameter, or the first of the defined `parameterValues`
 
 Pathgroups definition allow for hierarchical structuring. For instance, if an action defines a pathname of :tab/:pane there is the possibility to define all available tabs and, for each tab, all the available panes in the following way: 
 

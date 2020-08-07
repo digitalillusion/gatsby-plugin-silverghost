@@ -45,8 +45,7 @@ const WelcomeMessage = () => {
               ]
             })
         }
-      },
-      ajax: true
+      }
     })
     .build()
 

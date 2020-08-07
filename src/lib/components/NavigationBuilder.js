@@ -12,8 +12,6 @@ export class NavigationBuilder {
     this.treeRoot = { children: [] };
     this.lastTab = null;
     this.hrefs = {};
-    this.treeOnExpandActions = {};
-    this.treeOnSelectActions = {};
     this.store = store;
     this.history = history;
     this.authorizations = authorizations;
@@ -128,7 +126,7 @@ export class NavigationBuilder {
       action: action,
       options: Object.assign(
         {
-          ajax: false,
+          ajax: true,
           mapper: () => []
         },
         options
@@ -178,26 +176,26 @@ export class NavigationBuilder {
         return this;
       }
 
-      onExpand(action, paramMapper, ajax) {
+      onExpand(action, mapper, ajax) {
         if (this.treeNode && action) {
           this.treeNode.withNodeOnExpand({
             action: action,
             options: {
               ajax: ajax,
-              mapper: paramMapper
+              mapper: mapper
             }
           });
         }
         return this;
       }
 
-      onSelect(action, paramMapper, ajax) {
+      onSelect(action, mapper, ajax) {
         if (this.treeNode && action) {
           this.treeNode.withNodeOnSelect({
             action: action,
             options: {
               ajax: ajax,
-              mapper: paramMapper
+              mapper: mapper
             }
           });
         }
@@ -227,13 +225,13 @@ export class NavigationBuilder {
         return this;
       }
 
-      onExpand(action, paramMapper, ajax = false) {
-        this.treeBuilder = this.treeBuilder.onExpand(action, paramMapper, ajax);
+      onExpand(action, mapper, ajax = true) {
+        this.treeBuilder = this.treeBuilder.onExpand(action, mapper, ajax);
         return this;
       }
 
-      onSelect(action, paramMapper, ajax = false) {
-        this.treeBuilder = this.treeBuilder.onSelect(action, paramMapper, ajax);
+      onSelect(action, mapper, ajax = true) {
+        this.treeBuilder = this.treeBuilder.onSelect(action, mapper, ajax);
         return this;
       }
 
@@ -252,30 +250,6 @@ export class NavigationBuilder {
     let mutator = new TreeBuilderMutator(mutable);
     treeBuilderFunction(mutator);
 
-    const extractFunctions = (list, tree, property) => {
-      let root = Array.isArray(tree) ? tree : [tree];
-      root.forEach(item => {
-        let nodeId = item.id;
-        if (item.children) {
-          extractFunctions(list, item.children, property);
-        }
-        if (item[`${property}`]) {
-          list[`${nodeId}`] = item[`${property}`];
-        }
-      });
-    };
-
-    extractFunctions(
-      builder.treeOnExpandActions,
-      builder.treeRoot,
-      "onExpandActions"
-    );
-    extractFunctions(
-      builder.treeOnSelectActions,
-      builder.treeRoot,
-      "onSelectActions"
-    );
-
     return this;
   }
 
@@ -285,11 +259,10 @@ export class NavigationBuilder {
   build() {
     let builder = this;
 
-    function performMapping(mapper, mappingContext) {
+    function performMapping(mapper, mappingContext, mapped = {}) {
       if (!mapper) {
         return [];
       }
-      let mapped = {};
       let res = mapper(mapped, mappingContext);
       Object.assign(mappingContext, mapped);
       return res;
@@ -302,7 +275,7 @@ export class NavigationBuilder {
         sorting = undefined,
         filter = undefined,
         exportData = undefined,
-        ajax = false
+        ajax = true
       } = mappingContext;
       return new Promise(resolve => {
         let action = null;
@@ -331,6 +304,7 @@ export class NavigationBuilder {
           }
           let queryString = encodeURIComponentObject(
             Object.assign(
+              {},
               pagination,
               sorting,
               filterEncoding,
@@ -348,15 +322,15 @@ export class NavigationBuilder {
           unsubscribe();
         });
 
-        if (ajax || !this.history) {
+        if (ajax || !builder.history) {
           builder.store.dispatch(action);
         } else {
-          builder.store.dispatch(this.history.push(action));
+          builder.store.dispatch(builder.history.push(action));
         }
       });
     }
 
-    function onNodeInteraction(actions) {
+    function onNodeInteraction(actions, node) {
       if (!actions) {
         return new Promise(resolve => resolve());
       }
@@ -369,9 +343,10 @@ export class NavigationBuilder {
               : {},
           tab: builder.selectedTab,
           pane: localStorage.getItem("NavigationBuilder.selectedPane"),
-          ajax: action.options.ajax
+          ajax: action.options.ajax,
+          target: node
         };
-        performMapping(action.options.mapper, mappingContext);
+        performMapping(action.options.mapper, mappingContext, action.action);
         promises.push(submitAction(action, mappingContext));
       }
       return Promise.all(promises);
@@ -389,6 +364,26 @@ export class NavigationBuilder {
       }
 
       return tab;
+    }
+
+    function attemptPreventEventBubbling(target) {
+      if (target.stopPropagation || target.preventDefault) {
+        if (target.stopPropagation) {
+          target.stopPropagation();
+        }
+        if (target.preventDefault) {
+          target.preventDefault();
+        }
+      } else {
+        Object.keys(target).forEach(prop => {
+          if (target[prop].stopPropagation) {
+            target[prop].stopPropagation();
+          }
+          if (target[prop].preventDefault) {
+            target[prop].preventDefault();
+          }
+        });
+      }
     }
 
     let navigation = {
@@ -557,16 +552,7 @@ export class NavigationBuilder {
             let res = performMapping(href.options.mapper, mappingContext);
 
             if (mappingContext.ajax) {
-              // Try to find the HTML target to preventDefault()
-              if (target.preventDefault) {
-                target.preventDefault();
-              } else {
-                Object.keys(target).forEach(prop => {
-                  if (target[prop].preventDefault) {
-                    target[prop].preventDefault();
-                  }
-                });
-              }
+              attemptPreventEventBubbling(target);
             }
 
             if (res !== false) {
@@ -575,6 +561,14 @@ export class NavigationBuilder {
           }
           return Promise.all(promises);
         };
+      },
+      nodeOnSelect: (node, target) => {
+        attemptPreventEventBubbling(target);
+        return onNodeInteraction(node.onSelectActions, node);
+      },
+      nodeOnExpand: (node, target) => {
+        attemptPreventEventBubbling(target);
+        return onNodeInteraction(node.onExpandActions, node);
       }
     };
 

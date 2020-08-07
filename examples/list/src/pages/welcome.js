@@ -54,7 +54,7 @@ const WelcomeMessage = () => {
                             sorting: ["timestamp", formData.get("sort")]
                         })
                 }
-            }, ajax: true
+            }
         })
         .build()
 

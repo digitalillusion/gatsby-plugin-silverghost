@@ -4,7 +4,11 @@ function matchByPathname(pathname, definitions) {
   for (let definition of definitions) {
     if (definition.isMatching(pathname)) {
       try {
-        definition.getPathgroupParams(pathname, true, true, true);
+        definition.getPathgroupParams(pathname, {
+          includeExplicitParams: true,
+          includeImplicitParams: true,
+          failOnMismatch: true
+        });
         return definition;
       } catch (e) {
         if (e.code !== "PGP_MISMATCH") {
@@ -114,7 +118,7 @@ export class AbstractActions {
     } else {
       params = definition.getPathgroupParams(
         window.location.pathname + window.location.hash,
-        true
+        { includeExplicitParams: true }
       );
     }
 
@@ -148,7 +152,10 @@ export class AbstractActions {
     let definition = AbstractActions.getDefinition(action);
     let pathname = definition.getPathname(params);
 
-    let defGroupParams = definition.getPathgroupParams(pathname, true, true);
+    let defGroupParams = definition.getPathgroupParams(pathname, {
+      includeExplicitParams: true,
+      includeImplicitParams: true
+    });
     let queryParams = params.slice(defGroupParams.length, params.length);
     let groupParams = routerPathname
       ? splitPathnameParts(routerPathname)

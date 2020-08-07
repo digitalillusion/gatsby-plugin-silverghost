@@ -4,16 +4,20 @@
 Gatsby plugin offering a simple action framework based on redux. It is thought for highly dynamic pages in need of real time synchronization between model and view. 
 It aims to be generic enough to integrate with others means of synchronization (e.g: the Gatsby Node API) as well.    
  
-Live demo  
---   
+### Live demo  
+ 
 https://gatsby-plugin-silverghost-6637351181.gtsb.io/  
     
-Configuration 
---   
+### Examples
+
+ - [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal): Demonstrating how reductions accumulate into redux state according to action parameters
+ - [list](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/list): Demonstrating how reductions split into redux state, initialization through URL parameters and list filtering, sorting and pagination     
+ - [tree](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/tree): Demonstrating how reductions collect into redux state and dealing with concurrent actions     
+    
+### Configuration  
 
 In order to understand how to use the framework, please refer to the examples. However, in order to configure the plugin, add the necessary definition in `./gatsby-config.js`    
-
-        
+    
     module.exports = {  
       plugins: [  
         {  
@@ -64,18 +68,13 @@ Finally, if there are changes made in the plugin code, in order to redeploy to t
   
 > A possible way to perform the clean install is to remove the yarn.lock file and then execute `yarn install`.  
   
-When the plugin is installed in local_modules, you can install and start the examples from theiir respective folders:    
+When the plugin is installed in local_modules, you can modify it and see the changes directly in the chosen example:    
     
- - [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal): Demonstrating how reductions accumulate into redux state according to action parameters
- - [list](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/list): Demonstrating how reductions split into redux state, initialization through URL parameters and list filtering, sorting and pagination     
-      
-License 
--- 
+### License 
 
 BSD    
       
-References 
---      
+### References 
  
 The redux store creation code and ssr are copied from [gatsby-plugin-react-redux](https://github.com/le0nik/gatsby-plugin-react-redux/)            
 Silver Ghost is a speculation about the name of the yellow Rolls-Royce that Gatsby drives in F. Scott Fitzgerald's novel.

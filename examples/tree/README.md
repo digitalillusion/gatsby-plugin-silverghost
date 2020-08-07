@@ -60,7 +60,7 @@ The root reducer deals with both setting a message of the day and searching mess
 
 In order to have the two sections of the view updated by the same action, the payload gets split among the two reducers. As seen in the [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal) example, the state once again accumulates by the `:channel` path group parameter.
 
-> The initial state is the global state for all reducers of a given action; it must be coherent with the structure of the state the reducers will create subsequently. Even if it is assigned to several reducers of the same action, it will be applied by the one which gets called first, so it must be the same constant object for every reducer instantiation in that scope.
+> The initial state is the global state for all reducers; it must be coherent with the structure of the state the reducers will create subsequently. Even if it is assigned to several reducers, it will be applied by the one which gets called first, so it must be the same constant object for every reducer instantiation.
 
 The order of concatenation of the macros is relevant. Infact calling accumulate on a split payload would cause the redux state to be populated as follows, which is our case:
 	

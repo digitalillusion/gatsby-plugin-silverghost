@@ -1,11 +1,10 @@
 {
-  "name": "example-list",
+  "name": "example-tree",
   "private": true,
-  "description": "A list example of gatsby-plugin-silverghost",
+  "description": "A tree example of gatsby-plugin-silverghost",
   "version": "0.1.0",
   "author": "Adriano Dalpane <adriano.dalpane@gmail.com>",
   "dependencies": {
-    "@reach/router": "^1.3.4",
     "gatsby": "^2.23.12",
     "gatsby-plugin-silverghost": "0.2.16",
     "prop-types": "^15.7.2",

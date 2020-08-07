@@ -38,7 +38,7 @@ for (let i = 0; i < 15; i++) {
 function prepareDataSet(channel) {
   return ListReducer.toList(
     dataSet
-      .filter(m => m.channel === "broadcast")
+      .filter(m => m.channel === channel)
       .sort((m1, m2) => m2.timestamp - m1.timestamp)
       .slice(0, 5),
     { number: 0, size: 5 },

@@ -144,7 +144,10 @@ function isSamePathgroup(
     ? state.params.filter(e => !pathgroupParams.includes(e)).map(e => "" + e)
     : [];
 
-  let explicitParams = definition.getPathgroupParams(pathname, true, false);
+  let explicitParams = definition.getPathgroupParams(pathname, {
+    includeExplicitParams: true,
+    includeImplicitParams: false
+  });
   // If action type and all pathgroup params are the same, accumulation is possible; else state is obsolete
   if (
     state.type === reduction.type &&
@@ -182,7 +185,9 @@ export const accumulate = reducer => {
 
     let definition = action.definition;
     let pathname = definition.getPathname(action.params);
-    let pathgroupParams = definition.getPathgroupParams(pathname);
+    let pathgroupParams = definition.getPathgroupParams(pathname, {
+      params: action.params
+    });
 
     let tree = isSamePathgroup(
       definition,
@@ -233,14 +238,17 @@ export const collect = reducer => {
 
     let definition = action.definition;
     let pathname = definition.getPathname(action.params);
-    let pathgroupParams = definition.getPathgroupParams(pathname);
+    let pathgroupParams = definition.getPathgroupParams(pathname, {
+      params: action.params
+    });
     let statePayload = Object.assign({}, state.payload);
     let reductionPayload = reduction.payload;
 
     let payload;
     if (pathgroupParams.length > 0) {
       // Attempt match accumulated state
-      for (let param of pathgroupParams) {
+      for (let i = 0; i < pathgroupParams.length; i++) {
+        let param = pathgroupParams[i] || action.params[i];
         if (
           statePayload &&
           statePayload[param] &&
@@ -272,6 +280,14 @@ export const collect = reducer => {
                 collectHierarchy(statePayload, reductionPayload);
               }
             }
+          } else if (
+            statePayload &&
+            !statePayload[collectKey] &&
+            reductionPayload &&
+            reductionPayload[collectKey]
+          ) {
+            // Attempt to match accumulated state
+            statePayload[collectKey] = reductionPayload[collectKey];
           }
         }
 
