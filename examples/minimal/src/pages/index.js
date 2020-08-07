@@ -1,9 +1,9 @@
 import React from "react"
-import { NavigationBuilder } from "gatsby-plugin-silverghost/lib/components/NavigationBuilder"
-import { isEmpty } from "gatsby-plugin-silverghost/lib/functions"
-import { useSelector, useStore } from "react-redux"
-import { Actions } from "../actions/createActions"
-import { graphql, useStaticQuery } from "gatsby"
+import {NavigationBuilder} from "gatsby-plugin-silverghost/lib/components/NavigationBuilder"
+import {isEmpty} from "gatsby-plugin-silverghost/lib/functions"
+import {useSelector, useStore} from "react-redux"
+import {Actions} from "../actions/createActions"
+import {graphql, useStaticQuery} from "gatsby"
 
 const WelcomeMessage = () => {
   const data = useStaticQuery(graphql`

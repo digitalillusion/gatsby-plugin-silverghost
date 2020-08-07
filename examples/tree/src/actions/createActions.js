@@ -1,6 +1,6 @@
 import {
-  makeAction,
-  AbstractActions
+  AbstractActions,
+  makeAction
 } from "gatsby-plugin-silverghost/lib/actions"
 
 const definitions = {

@@ -1,6 +1,6 @@
-import { applyMiddleware, createStore } from "redux"
+import {applyMiddleware, createStore} from "redux"
 import rootReducer from "./reducer"
-import { reduxService } from "../services/reduxService"
+import {reduxService} from "../services/reduxService"
 
 export default preloadedState =>
   createStore(rootReducer, preloadedState, applyMiddleware(reduxService))

@@ -1,10 +1,9 @@
 
   
-# gatsby-plugin-silverghost list example    
-Demonstrating how reductions split into redux state, initialization through URL parameters and list filtering, sorting and pagination
+# gatsby-plugin-silverghost tree example    
+Demonstrating how reductions collect into redux state and dealing with concurrent actions
     
-Configuration 
---    
+### Configuration 
 
 In order to take advantage of the framework, the following configuration is needed. The files' location is arbitrary as long as they are correctly referenced in `gatsby-config.js`.  
    
@@ -15,170 +14,259 @@ There are other files which are necessary to the example but not directly refere
   
  - *./src/services/reduxService* contains the reduction logic  
  - *./src/state/reducer* defines initial application state and root reducer
- - *./src/pages/index.js*, *./src/pages/welcome.js* the view  
+ - *./src/pages/index.js* the view  
+ - *./src/components/layout.js* A page layout to differentiate between logged in and logged out view
   
 **Actions**  
   
 The createActions file contains the following definition:  
   
-    const definitions = {  
-      WELCOME: makeAction("@@App/WELCOME", "welcome", "/welcome/:channel/:query", {  
-        channel: ["room", "broadcast"]  
-      })  
+    const definitions = {
+      SESSION: makeAction("@@App/SESSION", "session"),
+      TREE: makeAction("@@App/TREE", "tree", "/tree/:level0/:level1/:level2", {
+        level0: [],
+        level1: [[]],
+        level2: [[[]]]
+      })
     }
     
-For a detailed explanation refer to the [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal) example. The difference here is that we allow an unbound action parameter `:query` that has the function of initialising the view from the URL the end user navigated to;  it is unbound because it may assume any string value.
-Along with payload and params, the actions provide other fields that can be populated during a request, namely:
- - filter: an array of filters to apply to a list, defined as objects with the following properties:
-	 - columnName: the name of the field to filter. it support traversal so it is not necessary that it is a field in the first level of the rows to filter
-	 - operation: the kind of matching that must be done in order to decide to keep or to discard a row. Typical operations are *contains*, *equal*, *less than*, *greater than*...
-	 - value: the value for the filter to match against
- - pagination: contains pagination information like:
-	 - number: the current page number
-	 - size: the number of rows in a page
-	 - totalElements: the count of rows that need to be paged
- - sorting: an array containing the name of the field to sort and the direction, *asc* for ascendant or *desc* for descendant
+For a detailed explanation refer to the [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal) example. However, in this case we define two concurrent actions. The login/logout action, SESSION and a TREE action to work on the view. The particularity of this last action is that it does define pathgroup parameters but they are unbound. This way anything that will actually occurr in the parameter placeholder upon action istantiation will match the definition and there is no need to know it in advance. This action will be used to dynamically display a tree.
 
-> Sorting on multiple fields is unsupported, but it can be obtained by defining a hidden field that aggregates the respective weight of the rows according to the fields to sort onto. Sorting can afterward be applied to this hidden field.
+> Infact there is a constraint given to the tree here, its maximum dept; if we go deeper than what defined by mean of the pathgroup parameters, the reducer will no longer be capable of structuring the redux state as a tree
 
-The action fields descrivibed above are all handled by a specific reducer called `ListReducer` which we will focus on next.
+The session action has a different pecularity: it doesn't even have a pathname. It's completely AJAX and it cannot be triggered by accessing an URL, as normally others action do. Even so, be aware that it can still take parameters, although it's not the case in this simple example.
 
-      
 **Root reducer**  
   
-The root reducer deals with both setting a message of the day and searching messages, on two pages (one for each channel). Therefore, it uses a `DefaultReducer` for the message of the day and a `ListReducer` for the search. The two reducers' result go through accumulation first and then **split**.
+The root reducer deals with two separate, simple actions that insist on this page and it uses the `DefaultReducer` for both. What is more interesting to see is that the TREE action payload is first accumulated and then goes through **collect**.
 
-    const rootReducer = combineReducers({  
-      [Actions.WELCOME.getReducerKey()]: accumulate(  
-        split(  
-          [Actions.WELCOME],  
-          DefaultReducer.instance(initialState, Actions.WELCOME),  
-          ListReducer.instance(initialState, Actions.WELCOME)  
-        )  
-      )  
+    const rootReducer = combineReducers({
+      [Actions.SESSION.getReducerKey()]: DefaultReducer.instance(
+        initialState.session,
+        Actions.SESSION
+      ),
+      [Actions.TREE.getReducerKey()]: collect(
+        accumulate(DefaultReducer.instance(initialState.tree, Actions.TREE))
+      )
     })
 
-In order to have the two sections of the view updated by the same action, the payload gets split among the two reducers. As seen in the [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal) example, the state once again accumulates by the `:channel` path group parameter.
+In order to display each node of the tree we'll need some properties (the fact that it is a leaf, its label, icon, etc.) and the eventual children of a given node. Such children are constructed dynamically so they need to be accumulated in the state. However, they dont go all at the same level, but instead they are parented to a node expanded previously. The collect macro solves this latter problem
 
-> The initial state is the global state for all reducers; it must be coherent with the structure of the state the reducers will create subsequently. Even if it is assigned to several reducers, it will be applied by the one which gets called first, so it must be the same constant object for every reducer instantiation.
+> You can also apply collect first and accumulate later. The result will be a list of several collected structures, which may also have a meaning in a different context
 
-The order of concatenation of the macros is relevant. Infact calling accumulate on a split payload would cause the redux state to be populated as follows, which is our case:
+Accumulate and collect use the pathgroup parameters to understand what part of the redux state must change. For example, if the action path is `/tree/_0/_0_3/_0_3_1` the action payload will be applied at such position in the existing state
 	
     {     
-      room: [defaultPayload1, listPayload1],     
-      broadcast: [defaultPayload2, listPayload2]   
+      tree: { _0: { _0_1: {...}, 
+                    _0_2: {...}, 
+                    _0_3: { _0_3_0: {...}, 
+                            _0_3_1: payload, 
+                            ... }
+                    ... }
+            }
     }
 
-Conversely, if split applies to accumulate, the state would result like this:
-
-    [     
-      { room: defaultPayload1, broadcast: defaultPayload2 },
-      { room: listPayload1, broadcast: listPayload2 }
-    ]
-
-One way of organizing the structure of the state may result more elegant than the other, depending on how the view implementation.
   
 **Reduction services**  
   
-The reduction service contains a simulated call to a server that encodes the action information about the filter, pagination and sorting and return a result from a local dataset instead. This is done through the library function `encodeSearchQuery`.
+The reduction service is a bit more complex this time since it handles two concurrent actions. The tree must be visible only to logged in users and so the service will not make any TREE action call for anonymous users:
 
-The reduction services propagates an action which has a payload composed of an array of two elements that will be split on the two reducers: an object containing the query string for the `DefaultReducer` and an object representing a list for the `ListReducer`. In the event of setting the message of the day, for optimal performance, the list of messages gets recovered from the state and in the event of searching the list of message the converse happens.
-
-> There is no guarantee for the previous state to be defined. There is a condition under which the **accumulation must restart**: change of a pathgroup parameter other than the one being accumulated. Such parameters identify several paths whose state must not be mixed. If accumulation didn't restart, there would end up a portion of the old state (from the previous path) merged with a portion of the new state (from the action having changed some other pathgroup parameter), which is incoherent and inconvenient. This is the reason why a channel page resets by going on the other channel page (the moment query parameter change), but not when we just go back to index. 
-
-    function handleWelcome(state, action, next) {
-      let [channel, query, request] = action.params
-      let payload
-      let previousState = state.payload[channel] || [{}, {}]
-      switch (request ? request.event : "") {
-        case "change":
-          payload = [
-            {
-              message: request.message,
-              timestamp: request.timestamp
-            },
-            previousState[1]
-          ]
-          break
-        case "search":
-        default:
-          payload = [previousState[0], simulateServerCall(previousState[1], action)]
-      }
+    export const reduxService = store => next => action => {
+      // Perform reduction logic
+      let matched = Actions.match(action)
+      const state = store.getState()
+      const authentication = state[Actions.SESSION.getReducerKey()]
+      const isAuthenticated =
+        !isEmpty(authentication) && !authentication.payload.anonymous
     
-      return next(
-        Actions.WELCOME.propagate(action, {
-          params: [channel, query],
+      switch (matched.type) {
+        case Actions.SESSION.REQUEST:
+          handleSession(store.dispatch, matched, next)
+          break
+        case Actions.TREE.REQUEST:
+          const state = store.getState()[Actions.TREE.getReducerKey()]
+          isAuthenticated && handleTree(state, matched, next)
+          break
+        default:
+      }
+
+      // Pass the action to following middlewares
+      return action
+    }
+
+The above is needed since upon first access to the page the navigation builder dispatches a special `@@router/LOCATION_CHANGE` action to resolve to a TREE action, but this call must not reach the server if the user is anonymous. There is the need to skip this call and perform a new one as soon as the state for the SESSION action contains the authentication information, as we will see later.
+
+The two handlers are quite straightforward; the `handleSession()` is faking an HTTP request that returns authentication information after a given delay:
+
+    let isLoggedIn = true
+    
+    export async function handleSession(dispatch, action, next) {
+      let [request] = action.params
+      const responseLoggedIn = {
+        anonymous: false,
+        authentication: { name: "Administrator" }
+      }
+      const responseLoggedOut = { anonymous: true }
+    
+      let fetch
+      switch (request ? request.event : "") {
+        case "login":
+          isLoggedIn = true
+          fetch = Promise.resolve(responseLoggedIn)
+          break
+        case "logout":
+          isLoggedIn = false
+          fetch = Promise.resolve(responseLoggedOut)
+          break
+        default:
+          fetch = new Promise(function(resolve) {
+            setTimeout(
+              resolve.bind(null, isLoggedIn ? responseLoggedIn : responseLoggedOut),
+              1200
+            )
+          })
+      }
+      const payload = await fetch
+      next(
+        Actions.SESSION.propagate(action, {
+          params: [],
           payload
         })
       )
     }
+    
+On the other side, the `handleTree()` is invoked each time a tree node is expanded and it will determine how many children such node will have. To emphasize the dynamicity of the implementation, a random number of children is returned by a simulated server call each time the end user expands a node.
 
-As always, accumulate macro avoids to bother about which is the part of the redux state correspondent to the selected channel that we are going to update, performing automatically the merge based on the current pathgroup parameters
-
-> Always make sure that the length of the payload array equals the count of the reducers passed to the split macro, otherwise the action won't produce any effect
+    function handleTree(state, action, next) {
+      let keys = [...action.params]
+      let request = keys.pop()
+      let collectPath = [...keys]
+    
+      let payload
+      switch (request ? request.event : "") {
+        case "collapse":
+          request.target.properties.expanded = false
+          payload = { ...request.children, ...request.target.properties }
+          break
+        case "expand":
+        default:
+          request.target.properties.expanded = true
+          let children = simulateServerCall(collectPath)
+          payload = { ...children, ...request.target.properties }
+      }
+    
+      return next(
+        Actions.TREE.propagate(action, {
+          params: collectPath,
+          payload
+        })
+      )
+    }
+  
+>  Since accumulate works at first level, not on a hyerarchy, the children cannot be nested in an identifying property (say: "children") but they need to stay along with the node properties (like label, icon, etc.)
   
 **View**  
   
-On the index page, the example presents two links by mean of which to search the welcome messages of the channel "room" rather than those of the channel "broadcast" using a predefined search keyword in the latter case.
-Upon transitions coming from outside the framework, like clicking such links, we need to match the landing location to an action (rather then showing the content from the redux state). This way the action parameters are updated reflecting the ones in the URL and the framework is bootstrapped.
+The view is mainly compose with two fragments: the layout, which wraps the home page. In the layout we find the handling of the session
 
-This magic is done inside `NavigationBuilder` as soon as we pass the router history:
-
-    new NavigationBuilder(store, globalHistory)
-
-It will dispatch a special `@@router/LOCATION_CHANGE` action request that will be transformed in an appropriate action (`@@App/WELCOME` in the example) when the end user lands on the welcome messages page
-
-> Make sure that `NavigationBuilder` construction is present before you attempt to retrieve data from the redux state or else such data will not be up to date
-
-The welcome page shows a text input box capable of setting the message of the day and a filtered, paginated, sorted list of welcome messages from the currently selected channel.
-The navigation event makes a request by filling the necessary fields on the action, depending on the event that occurs
-
-    const navigation = navigationBuilder
-        .withEvent(Actions.WELCOME, {
-            mapper: (action, input) => {
-                const event = input.target.event
-                const target = input.target.target
-                const formData = new FormData(target.currentTarget ? target.currentTarget : target)
-                switch (event) {
-                    case "change":
-                        const message = formData.get("message");
-                        Object.assign(action, {
-                            params: [
-                                channel,
-                                query,
-                                {
-                                    event,
-                                    timestamp: new Date(),
-                                    message
-                                }
-                            ]
-                        })
-                        break
-                    case "search":
-                    default:
-                        const newQuery = formData.get("query");
-                        action.params = [channel, newQuery]
-                        return Object.assign(action, {
-                            params: [
-                                channel,
-                                newQuery,
-                                {event}
-                            ],
-                            pagination: {number: formData.get("page") - 1},
-                            filter: [{columnName: "message", value: newQuery, operation: "contains"}],
-                            sorting: ["timestamp", formData.get("sort")]
-                        })
-                }
-
-            }
+    export default function Layout({ children }) {
+      const store = useStore()
+      const session = useSelector(state => state.session, []).payload
+      const isAnonymous = isEmpty(session) || session.anonymous
+    
+      const navigation = new NavigationBuilder(store, globalHistory)
+        .withEvent(Actions.SESSION, {
+          mapper: (action, input) => (action.params = [input.target])
         })
         .build()
-        
- Run the example application
---        
+    
+      useEffect(() => {
+        if (isEmpty(session)) {
+          navigation.onEvent(Actions.SESSION)({ event: "whois" })
+        } else if (!session.anonymous) {
+          navigation.refresh()
+        }
+      }, [isAnonymous])
+    
+      return isAnonymous ? (
+        <Anonymous navigation={navigation} />
+      ) : (
+        <Authenticated session={session} navigation={navigation}>
+          {children}
+        </Authenticated>
+      )
+    }
+
+Since the refresh that gives initiation to the proper action (`@@App/TREE` in the example) done by `NavigationBuilder` construction upon landing on the page is lost due to the fact that the user is not logged in (as said above, is the redux service that prevents the fulfillment of this call), there is the need to call the hook [useEffect](https://reactjs.org/docs/hooks-effect.html) when the session is no longer anonymous and explicitely perform the
+
+    navigation.refresh()
+
+The home page takes once again advantage of the `NavigationBuilder` to recursively build the tree:
+
+     const treeBuilder = builder => {
+        function createNodes(nodes, path = []) {
+          for (const [key, node] of Object.entries(nodes)) {
+            const nodePath = [...path, key]
+            const { label, expanded, leaf, ...children } = node
+            const properties = { label, expanded, leaf }
+            if (!leaf) {
+              builder
+                .withBranch(key, properties)
+                .onExpand(Actions.TREE, (action, input) => {
+                  action.params = [
+                    ...nodePath,
+                    {
+                      event: input.target.properties.expanded
+                        ? "collapse"
+                        : "expand",
+                      target: input.target,
+                      children
+                    }
+                  ]
+                  return action
+                })
+              createNodes(children, nodePath)
+              builder.endBranch()
+            } else {
+              builder.withSibling(key, properties)
+            }
+          }
+          return builder
+        }
+        createNodes(tree.payload)
+      }
+    
+      const navigation = navigationBuilder.withTree(treeBuilder).build()
+
+Equally recursively, the tree is drawn. Note that the object key we used to uniquely identify the node is later on called id, and a field named properties contains everything that was passed on as such:
+
+      function drawLevel(nodes) {
+        return (
+          <ul>
+            {(nodes || []).map(node => (
+              <li
+                key={node.id}
+                onClick={target => navigation.nodeOnExpand(node, target)}
+              >
+                {
+                  <div>
+                    <span>{node.properties.label}</span>
+                    {node.properties.expanded && drawLevel(node.children)}
+                  </div>
+                }
+              </li>
+            ))}
+          </ul>
+        )
+      }
+      
+      <div>{drawLevel([...navigation.getTree()])}</div>
+
+### Run the example application
+
     yarn install   
     yarn start  
 
-License 
---   
+### License 
+ 
 BSD

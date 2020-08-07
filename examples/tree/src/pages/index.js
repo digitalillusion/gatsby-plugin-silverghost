@@ -1,8 +1,9 @@
 import React from "react"
-import { graphql, Link, useStaticQuery } from "gatsby"
+import { graphql, useStaticQuery } from "gatsby"
 import { NavigationBuilder } from "gatsby-plugin-silverghost/lib/components/NavigationBuilder"
 import { useSelector, useStore } from "react-redux"
 import { Actions } from "../actions/createActions"
+import Layout from "../components/layout"
 
 const IndexPage = () => {
   const store = useStore()
@@ -27,7 +28,7 @@ const IndexPage = () => {
         const { label, expanded, leaf, ...children } = node
         const properties = { label, expanded, leaf }
         if (!leaf) {
-          builder = builder
+          builder
             .withBranch(key, properties)
             .onExpand(Actions.TREE, (action, input) => {
               action.params = [
@@ -43,16 +44,15 @@ const IndexPage = () => {
               return action
             })
           createNodes(children, nodePath)
-          builder = builder.endBranch()
+          builder.endBranch()
         } else {
-          builder = builder.withSibling(key, properties)
+          builder.withSibling(key, properties)
         }
       }
       return builder
     }
     createNodes(tree.payload)
   }
-
   const navigation = navigationBuilder.withTree(treeBuilder).build()
 
   function drawLevel(nodes) {
@@ -76,11 +76,11 @@ const IndexPage = () => {
   }
 
   return (
-    <div>
+    <Layout>
       <h1>{data.site.siteMetadata.title}</h1>
       <p>{data.site.siteMetadata.description}</p>
       <div>{drawLevel([...navigation.getTree()])}</div>
-    </div>
+    </Layout>
   )
 }
 

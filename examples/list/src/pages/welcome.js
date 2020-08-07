@@ -1,7 +1,7 @@
 import React from "react"
-import { NavigationBuilder } from "gatsby-plugin-silverghost/lib/components/NavigationBuilder"
-import { isEmpty } from "gatsby-plugin-silverghost/lib/functions"
-import { globalHistory } from "@reach/router"
+import {NavigationBuilder} from "gatsby-plugin-silverghost/lib/components/NavigationBuilder"
+import {isEmpty} from "gatsby-plugin-silverghost/lib/functions"
+import {globalHistory} from "@reach/router"
 
 import {useSelector, useStore} from "react-redux";
 import {Actions} from "../actions/createActions";

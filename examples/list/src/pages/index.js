@@ -1,5 +1,5 @@
 import React from "react"
-import { graphql, Link, useStaticQuery } from "gatsby"
+import {graphql, Link, useStaticQuery} from "gatsby"
 
 const IndexPage = () => {
   const data = useStaticQuery(graphql`

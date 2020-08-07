@@ -1,4 +1,4 @@
-import { Actions } from "../actions/createActions"
+import {Actions} from "../actions/createActions"
 
 function handleWelcome(state, action, next) {
   let [channel, request] = action.params

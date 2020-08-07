@@ -1,7 +1,7 @@
-import { Actions } from "../actions/createActions"
-import { dataSet } from "../state/reducer"
-import { encodeSearchQuery } from "gatsby-plugin-silverghost/lib/actions/query/localEncoder"
-import { isEmpty } from "gatsby-plugin-silverghost/lib/functions"
+import {Actions} from "../actions/createActions"
+import {dataSet} from "../state/reducer"
+import {encodeSearchQuery} from "gatsby-plugin-silverghost/lib/actions/query/localEncoder"
+import {isEmpty} from "gatsby-plugin-silverghost/lib/functions"
 
 function simulateServerCall(state, action) {
   let [channel, query, request] = action.params

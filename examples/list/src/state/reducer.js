@@ -1,11 +1,6 @@
-import { Actions } from "../actions/createActions"
-import { combineReducers } from "redux"
-import {
-  accumulate,
-  split,
-  DefaultReducer,
-  ListReducer
-} from "gatsby-plugin-silverghost/lib/reducers"
+import {Actions} from "../actions/createActions"
+import {combineReducers} from "redux"
+import {accumulate, DefaultReducer, ListReducer, split} from "gatsby-plugin-silverghost/lib/reducers"
 
 export const dataSet = []
 for (let i = 0; i < 15; i++) {
