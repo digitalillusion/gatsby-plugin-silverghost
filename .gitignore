@@ -4,3 +4,4 @@ node_modules
 lib
 gatsby-*.js
 .idea
+*.tgz

@@ -60,6 +60,7 @@ const IndexPage = () => {
       <ul>
         {(nodes || []).map(node => (
           <li
+            style={{ cursor: "pointer" }}
             key={node.id}
             onClick={target => navigation.nodeOnExpand(node, target)}
           >
@@ -79,6 +80,7 @@ const IndexPage = () => {
     <Layout>
       <h1>{data.site.siteMetadata.title}</h1>
       <p>{data.site.siteMetadata.description}</p>
+      <em>Click on the root node below to expand the dynamic  tree</em>
       <div>{drawLevel([...navigation.getTree()])}</div>
     </Layout>
   )
