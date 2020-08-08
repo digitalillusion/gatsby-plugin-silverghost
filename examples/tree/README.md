@@ -14,8 +14,8 @@ There are other files which are necessary to the example but not directly refere
   
  - *./src/services/reduxService* contains the reduction logic  
  - *./src/state/reducer* defines initial application state and root reducer
- - *./src/pages/index.js* the view  
- - *./src/components/layout.js* A page layout to differentiate between logged in and logged out view
+ - *./src/pages/index* the view  
+ - *./src/components/layout* A page layout to differentiate between logged in and logged out view
   
 **Actions**  
   
@@ -30,11 +30,11 @@ The createActions file contains the following definition:
       })
     }
     
-For a detailed explanation refer to the [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal) example. However, in this case we define two concurrent actions. The login/logout action, SESSION and a TREE action to work on the view. The particularity of this last action is that it does define pathgroup parameters but they are unbound. This way anything that will actually occurr in the parameter placeholder upon action istantiation will match the definition and there is no need to know it in advance. This action will be used to dynamically display a tree.
+For a detailed explanation refer to the [minimal](https://github.com/digitalillusion/gatsby-plugin-silverghost/tree/master/examples/minimal) example. However, in this case we define two concurrent actions. The login/logout action, SESSION, and a TREE action to work on the view. The particularity of this last action is that it does define pathgroup parameters but they are unbound. This way anything that will actually occurr in the parameter placeholder upon action istantiation will match the definition and there is no need to know it in advance. This action will be used to dynamically display a tree.
 
-> Infact there is a constraint given to the tree here, its maximum dept; if we go deeper than what defined by mean of the pathgroup parameters, the reducer will no longer be capable of structuring the redux state as a tree
+> Infact there is a constraint given to the tree here: its maximum dept; if we go deeper than what defined by mean of the pathgroup parameters, the reducer will no longer be capable of structuring the redux state as a tree
 
-The session action has a different pecularity: it doesn't even have a pathname. It's completely AJAX and it cannot be triggered by accessing an URL, as normally others action do. Even so, be aware that it can still take parameters, although it's not the case in this simple example.
+The session action has a different peculiarity: it doesn't even have a pathname. It's completely AJAX, it cannot be triggered by a URL, as normally others action do. Even so, it can still take parameters, although it's not the case in this simple example.
 
 **Root reducer**  
   
@@ -50,11 +50,11 @@ The root reducer deals with two separate, simple actions that insist on this pag
       )
     })
 
-In order to display each node of the tree we'll need some properties (the fact that it is a leaf, its label, icon, etc.) and the eventual children of a given node. Such children are constructed dynamically so they need to be accumulated in the state. However, they dont go all at the same level, but instead they are parented to a node expanded previously. The collect macro solves this latter problem
+In order to display each node of the tree we'll need some properties (the fact that it is a leaf, its label, icon, etc.) and the eventual children of such a node. Children are dynamical, so they need to be accumulated in the state. However, they don't go all at the same place, but instead they are parented to a node expanded previously. The collect macro solves this latter problem
 
-> You can also apply collect first and accumulate later. The result will be a list of several collected structures, which may also have a meaning in a different context
+> You can also apply collect first and accumulate later. The result will be a list of several collected paths, which may also have a meaning in a different context
 
-Accumulate and collect use the pathgroup parameters to understand what part of the redux state must change. For example, if the action path is `/tree/_0/_0_3/_0_3_1` the action payload will be applied at such position in the existing state
+Accumulate and collect use the pathgroup parameters to understand what part of the redux state must change. For example, if the action path is `/tree/_0/_0_3/_0_3_1` the action payload will be applied at such position in the existing state.
 	
     {     
       tree: { _0: { _0_1: {...}, 
@@ -69,7 +69,7 @@ Accumulate and collect use the pathgroup parameters to understand what part of t
   
 **Reduction services**  
   
-The reduction service is a bit more complex this time since it handles two concurrent actions. The tree must be visible only to logged in users and so the service will not make any TREE action call for anonymous users:
+The reduction service is a bit more complex this time since it handles two concurrent actions. The tree must be visible only to logged users and so the service will not make any TREE action call for anonymous users:
 
     export const reduxService = store => next => action => {
       // Perform reduction logic
@@ -145,14 +145,14 @@ On the other side, the `handleTree()` is invoked each time a tree node is expand
       let payload
       switch (request ? request.event : "") {
         case "collapse":
-          request.target.properties.expanded = false
           payload = { ...request.children, ...request.target.properties }
+          payload.expanded = false
           break
         case "expand":
         default:
-          request.target.properties.expanded = true
           let children = simulateServerCall(collectPath)
           payload = { ...children, ...request.target.properties }
+          payload.expanded = true
       }
     
       return next(
@@ -163,11 +163,11 @@ On the other side, the `handleTree()` is invoked each time a tree node is expand
       )
     }
   
->  Since accumulate works at first level, not on a hyerarchy, the children cannot be nested in an identifying property (say: "children") but they need to stay along with the node properties (like label, icon, etc.)
+>  Since accumulate works at first level, not on a hierarchy, the children cannot be nested in an identifying property (say: "children") but they need to stay along with the node properties (like label, icon, etc.)
   
 **View**  
   
-The view is mainly compose with two fragments: the layout, which wraps the home page. In the layout we find the handling of the session
+The view is a composition two fragments: the home page and the layout, which wraps the home page. In the layout we find the handling of the session:
 
     export default function Layout({ children }) {
       const store = useStore()
@@ -259,6 +259,8 @@ Equally recursively, the tree is drawn. Note that the object key we used to uniq
           </ul>
         )
       }
+      
+      ...
       
       <div>{drawLevel([...navigation.getTree()])}</div>
 

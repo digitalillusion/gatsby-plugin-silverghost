@@ -23,14 +23,14 @@ function handleTree(state, action, next) {
   let payload
   switch (request ? request.event : "") {
     case "collapse":
-      request.target.properties.expanded = false
       payload = { ...request.children, ...request.target.properties }
+      payload.expanded = false
       break
     case "expand":
     default:
-      request.target.properties.expanded = true
       let children = simulateServerCall(collectPath)
       payload = { ...children, ...request.target.properties }
+      payload.expanded = true
   }
 
   return next(

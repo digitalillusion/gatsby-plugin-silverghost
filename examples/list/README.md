@@ -15,7 +15,7 @@ There are other files which are necessary to the example but not directly refere
   
  - *./src/services/reduxService* contains the reduction logic  
  - *./src/state/reducer* defines initial application state and root reducer
- - *./src/pages/index.js*, *./src/pages/welcome.js* the view  
+ - *./src/pages/index*, *./src/pages/welcome* the view  
   
 **Actions**  
   
