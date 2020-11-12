@@ -4871,10 +4871,10 @@ gatsby-plugin-page-creator@^2.3.19:
     lodash "^4.17.15"
     micromatch "^3.1.10"
 
-gatsby-plugin-silverghost@0.2.15:
-  version "0.2.15"
-  resolved "https://registry.yarnpkg.com/gatsby-plugin-silverghost/-/gatsby-plugin-silverghost-0.2.15.tgz#14b1d31b3823c24b1807b73651eb741a02b766fa"
-  integrity sha512-NxZOQJ+wpoBe3jqwrkBo7WdofSsMJpPFQGLrpAB7Bl8Gtg6hSXxaXMGKVvdbGvwyK7dyYOe2oPSe8SPEExsZOg==
+gatsby-plugin-silverghost@0.2.16:
+  version "0.2.16"
+  resolved "https://registry.yarnpkg.com/gatsby-plugin-silverghost/-/gatsby-plugin-silverghost-0.2.16.tgz#f58cdf38b21f277f1a242306eb6ff5de2689570a"
+  integrity sha512-b3i9NX9wb7xJuEFo9W+k4P1ziunmmjURi3pPaZCxf9EzshgxyvktohVFIwMKhkm6tReeU7hUhacVYtvqWCO2jg==
   dependencies:
     serialize-javascript "^4.0.0"
 
@@ -7657,9 +7657,9 @@ object-keys@^1.0.11, object-keys@^1.0.12, object-keys@^1.1.1:
   integrity sha512-NuAESUOUMrlIXOfHKzD6bpPu3tYt3xvjNdRIQ+FeT0lNb4K8WR70CaDxhuNguS2XG+GjkyMwOzsN5ZktImfhLA==
 
 object-path@^0.11.2, object-path@^0.11.4:
-  version "0.11.4"
-  resolved "https://registry.yarnpkg.com/object-path/-/object-path-0.11.4.tgz#370ae752fbf37de3ea70a861c23bba8915691949"
-  integrity sha1-NwrnUvvzfePqcKhhwju6iRVpGUk=
+  version "0.11.5"
+  resolved "https://registry.yarnpkg.com/object-path/-/object-path-0.11.5.tgz#d4e3cf19601a5140a55a16ad712019a9c50b577a"
+  integrity sha512-jgSbThcoR/s+XumvGMTMf81QVBmah+/Q7K7YduKeKVWL7N111unR2d6pZZarSk6kY/caeNxUDyxOvMWyzoU2eg==
 
 object-visit@^1.0.0:
   version "1.0.1"
