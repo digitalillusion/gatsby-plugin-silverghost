@@ -41,7 +41,7 @@ function handleTree(state, action, next) {
   )
 }
 
-let isLoggedIn = true
+let isLoggedIn = false
 
 export async function handleSession(dispatch, action, next) {
   let [request] = action.params

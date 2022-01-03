@@ -11,7 +11,7 @@ const WelcomeMessage = () => {
     const store = useStore();
     const navigationBuilder = new NavigationBuilder(store, globalHistory);
 
-    const welcome = useSelector(state => state.welcome, [])
+    const welcome = useSelector(state => state.welcome)
     const channel = welcome.params[0]
     const message = welcome.payload[channel][0]
     const list = welcome.payload[channel][1]

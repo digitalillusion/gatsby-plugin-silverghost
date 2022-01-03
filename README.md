@@ -6,7 +6,7 @@ It aims to be generic enough to integrate with others means of synchronization (
  
 ### Live demo  
  
-https://gatsby-plugin-silverghost-6637351181.gtsb.io/  
+https://gatsbypluginsilverghost.gtsb.io/  
     
 ### Examples
 

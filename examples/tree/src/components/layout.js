@@ -39,7 +39,7 @@ function Authenticated({ session, navigation, children }) {
 
 export default function Layout({ children }) {
   const store = useStore()
-  const session = useSelector(state => state.session, []).payload
+  const session = useSelector(state => state.session).payload
   const isAnonymous = isEmpty(session) || session.anonymous
 
   const navigation = new NavigationBuilder(store, globalHistory)
@@ -54,7 +54,7 @@ export default function Layout({ children }) {
     } else if (!session.anonymous) {
       navigation.refresh()
     }
-  }, [isAnonymous])
+  }, [isAnonymous, navigation, session])
 
   return isAnonymous ? (
     <Anonymous navigation={navigation} />

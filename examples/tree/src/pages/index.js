@@ -18,7 +18,7 @@ const IndexPage = () => {
     }
   `)
 
-  const tree = useSelector(state => state.tree, [])
+  const tree = useSelector(state => state.tree)
   let navigationBuilder = new NavigationBuilder(store)
 
   const treeBuilder = builder => {
@@ -59,14 +59,14 @@ const IndexPage = () => {
     return (
       <ul>
         {(nodes || []).map(node => (
-          <li
-            style={{ cursor: "pointer" }}
-            key={node.id}
-            onClick={target => navigation.nodeOnExpand(node, target)}
-          >
+          <li style={{ cursor: "pointer" }} key={node.id}>
             {
               <div>
-                <span>{node.properties.label}</span>
+                <button
+                  onClick={target => navigation.nodeOnExpand(node, target)}
+                >
+                  {node.properties.label}
+                </button>
                 {node.properties.expanded && drawLevel(node.children)}
               </div>
             }
